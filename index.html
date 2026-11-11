@@ -218,6 +218,7 @@
     #spmini{flex:1 1 100%;order:3}
     .sp-btn{width:38px;height:38px}.sp-btn svg{width:20px;height:20px}.sp-btn.sp-play{width:44px;height:44px}
     .sp-bar{height:24px}.sp-bar b{opacity:1}
+    .sp-time{flex-wrap:wrap;row-gap:2px}.sp-time .sp-vol{flex:1 1 100%;margin:2px 0 0}.sp-time .sp-vbar{flex:1;height:24px}.sp-vbar b{opacity:1}
     .spmini:not(.off){grid-template-columns:auto minmax(0,1fr);grid-template-areas:"art meta" "time time" "ctl ctl";row-gap:6px;padding:10px}
     .spmini:not(.off) .sp-ctl{justify-content:space-between;padding:0 6px}
     .spmini .sp-art,.spmini .sp-ico{width:48px;height:48px}
@@ -327,6 +328,15 @@
   .sp-bar:hover .sp-track i,.sp-bar.drag .sp-track i,.sp-bar:focus-visible .sp-track i{background:var(--accent)}
   .sp-bar b{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);opacity:0;transition:opacity .15s}
   .sp-bar:hover b,.sp-bar.drag b,.sp-bar:focus-visible b{opacity:1}
+  .sp-vol{display:flex;align-items:center;gap:4px;margin-left:6px;flex:0 0 auto}
+  .sp-vol .sp-vbtn{width:26px;height:26px;color:var(--muted)}.sp-vol .sp-vbtn svg{width:17px;height:17px}
+  .sp-vol .sp-vbtn:hover{color:var(--text)}
+  .sp-vbar{position:relative;width:70px;height:18px;cursor:pointer;touch-action:none;outline:none}
+  .sp-vbar:hover .sp-track i,.sp-vbar.drag .sp-track i,.sp-vbar:focus-visible .sp-track i{background:var(--accent)}
+  .sp-vbar b{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);opacity:0;transition:opacity .15s}
+  .sp-vbar:hover b,.sp-vbar.drag b,.sp-vbar:focus-visible b{opacity:1}
+  .sp-vnum{min-width:22px;text-align:right}
+  .sp-vol.locked{opacity:.5}.sp-vol.locked .sp-vbar{cursor:not-allowed}
   .sp-warn{background:var(--accent-dim);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .sp-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .sp-opt{display:flex;gap:10px;align-items:center;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);cursor:pointer}
@@ -473,9 +483,13 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.39.1";
+const APP_VERSION = "1.39.2";
 
 const CHANGELOG = [
+  { version:"1.39.2", date:"2026-11-11", title:"Spotify volume", notes:[
+    ["new","Volume meter in the Spotify player: drag it (or use the arrow keys) to change Spotify's volume, tap the speaker to mute."],
+    ["change","On iPhone the meter shows the level, but iOS only lets the side buttons change it."],
+  ]},
   { version:"1.39.1", date:"2026-11-11", title:"Better Spotify player", notes:[
     ["change","The Spotify player has its own play, pause, skip, back and shuffle buttons instead of emoji, so they look the same on PC and iPhone."],
     ["new","Song time: see how far through the song you are and drag (or tap) the bar to jump anywhere. Arrow keys jump 10 seconds on PC."],
@@ -1900,6 +1914,8 @@ const SP_IC={
   shuffle:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.2.9 4.3 2.6l2.4 4.8c1.1 1.7 2.3 2.6 4.3 2.6H20"/><path d="M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M13.9 8.4c.9-.9 1.9-1.4 3.3-1.4H20"/><path d="M17.5 4.5 20 7l-2.5 2.5M17.5 14.5 20 17l-2.5 2.5"/></svg>',
   more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18.5" cy="12" r="2"/></svg>',
   dice:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.3" cy="8.3" r="1.6"/><circle cx="15.7" cy="8.3" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="8.3" cy="15.7" r="1.6"/><circle cx="15.7" cy="15.7" r="1.6"/></svg>',
+  vol:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L11.6 6a.9.9 0 0 1 1.4.7v10.6a.9.9 0 0 1-1.4.7L7.2 14.5H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6M18.2 6.6a7.6 7.6 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L11.6 6a.9.9 0 0 1 1.4.7v10.6a.9.9 0 0 1-1.4.7L7.2 14.5H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z"/><path d="m16 9.5 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
   note:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6.6a1 1 0 0 1 .76-.97l8.5-2.1A1 1 0 0 1 19.5 4.5v10.3"/><circle cx="6.6" cy="17.6" r="2.6"/><circle cx="17" cy="15" r="2.6"/></svg>',
 };
 const SP_NEED_EXTRA=["user-top-read","user-read-recently-played","user-library-read","playlist-modify-private"];
@@ -1970,9 +1986,43 @@ function spMiniHtml(){
       <button class="sp-btn" onclick="spMusicModal()" title="Music options" aria-label="Music options">${SP_IC.more}</button></div>
     <div class="sp-time ${dur?"":"idle"}"><span id="sp_cur">${spFmt(pos)}</span>
       <div class="sp-bar" id="sp_bar" role="slider" aria-label="Position in song" aria-valuemin="0" aria-valuemax="${Math.round(dur/1000)}" aria-valuenow="${Math.round(pos/1000)}" tabindex="0"><div class="sp-track"><i id="sp_fill" style="width:${pc}%"></i></div><b id="sp_knob" style="left:${pc}%"></b></div>
-      <span id="sp_dur">${spFmt(dur)}</span></div></div>`;
+      <span id="sp_dur">${spFmt(dur)}</span>${spVolHtml(st)}</div></div>`;
 }
-function spPaint(){ const el=$("#spmini"); if(!el) return; el.innerHTML=spMiniHtml(); spBindBar(); }
+function spPaint(){ const el=$("#spmini"); if(!el) return; el.innerHTML=spMiniHtml(); spBindBar(); spBindVol(); }
+// ---- volume (v1.39.2) ----
+// Spotify can only change the volume on devices that allow it (PC/Mac app yes; iPhone no: iOS keeps volume to the side buttons)
+function spVolHtml(st){
+  const dev=st&&st.device; if(!dev) return "";
+  const v=SP.volDrag!=null?SP.volDrag:(dev.volume_percent==null?0:dev.volume_percent), can=dev.supports_volume!==false&&dev.volume_percent!=null;
+  return `<div class="sp-vol ${can?"":"locked"}" title="${can?"Volume "+v+"%":"Spotify can't change the volume on "+esc(dev.name||"this device")+". Use its volume buttons."}">
+    <button class="sp-btn sp-vbtn" onclick="spMute()" aria-label="${v?"Mute":"Unmute"}">${v?SP_IC.vol:SP_IC.mute}</button>
+    <div class="sp-vbar" id="sp_vbar" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${v}" tabindex="${can?0:-1}"><div class="sp-track"><i id="sp_vfill" style="width:${v}%"></i></div><b id="sp_vknob" style="left:${v}%"></b></div>
+    <span class="sp-vnum" id="sp_vnum">${v}</span></div>`;
+}
+function spCanVol(){ const d=SP.state&&SP.state.device; return !!(d&&d.supports_volume!==false&&d.volume_percent!=null); }
+function spVolLocked(){ toast("Spotify can't change the volume on "+((SP.state&&SP.state.device&&SP.state.device.name)||"this device")+". Use its volume buttons."); }
+async function spSetVol(v,final){
+  v=Math.round(Math.min(100,Math.max(0,v)));
+  const now=Date.now(); if(!final&&now-(SP.volSent||0)<250) return; SP.volSent=now;
+  try{ await spApi("/me/player/volume?volume_percent="+v,{method:"PUT"}); if(SP.state&&SP.state.device) SP.state.device.volume_percent=v; SP.err=""; }
+  catch(e){ SP.err=spErrText(e); if(final) spPaint(); }
+}
+function spMute(){
+  if(!spCanVol()){ spVolLocked(); return; }
+  const d=SP.state.device, v=d.volume_percent;
+  if(v>0){ SP.lastVol=v; d.volume_percent=0; spPaint(); spSetVol(0,true); }
+  else { const nv=SP.lastVol||50; d.volume_percent=nv; spPaint(); spSetVol(nv,true); }
+}
+function spBindVol(){
+  const bar=$("#sp_vbar"); if(!bar) return;
+  const at=x=>{ const r=bar.getBoundingClientRect(); return Math.round(Math.min(1,Math.max(0,(x-r.left)/r.width))*100); };
+  const show=v=>{ $("#sp_vfill").style.width=v+"%"; $("#sp_vknob").style.left=v+"%"; $("#sp_vnum").textContent=v; SP.volDrag=v; };
+  bar.onpointerdown=e=>{ if(!spCanVol()){ spVolLocked(); return; } e.preventDefault(); SP.dragging=true; bar.classList.add("drag"); try{ bar.setPointerCapture(e.pointerId); }catch(x){} const v=at(e.clientX); show(v); spSetVol(v); };
+  bar.onpointermove=e=>{ if(!SP.dragging||SP.volDrag==null) return; const v=at(e.clientX); show(v); spSetVol(v); };
+  const end=e=>{ if(SP.volDrag==null) return; SP.dragging=false; bar.classList.remove("drag"); const v=at(e.clientX); SP.volDrag=null; if(SP.state&&SP.state.device) SP.state.device.volume_percent=v; spSetVol(v,true); };
+  bar.onpointerup=end; bar.onpointercancel=()=>{ SP.dragging=false; SP.volDrag=null; bar.classList.remove("drag"); };
+  bar.onkeydown=e=>{ if(!spCanVol()||!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) return; e.preventDefault(); const d=SP.state.device; const v=Math.min(100,Math.max(0,d.volume_percent+(/Right|Up/.test(e.key)?5:-5))); d.volume_percent=v; show(v); SP.volDrag=null; spSetVol(v,true); };
+}
 // drag (or tap) the bar to move through the song; arrow keys jump 10 s
 function spBindBar(){
   const bar=$("#sp_bar"); if(!bar) return;
