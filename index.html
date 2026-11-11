@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b1426">
+<meta name="theme-color" content="#060c18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +15,7 @@
 <style>
   :root{
     /* v1.38 theme: dark navy (primary) · dark grey (secondary) · Spotify green (accent) */
-    --bg:#0b1426; --bg2:#0f1b31; --card:#1c1f26; --card2:#252932; --line:#2f3440;
+    --bg:#060c18; --bg2:#0a1324; --card:#1c1f26; --card2:#252932; --line:#2f3440;
     --text:#eaeef4; --muted:#939db0; --accent:#1db954; --accent2:#1ed760; --accent-dim:rgba(29,185,84,.15); --on-accent:#04110a;
     --hover-line:#454b58;
     --danger:#ff5c5c; --warn:#ffb347; --info:#5cc8ff;
@@ -187,10 +187,12 @@
   .mi-ic{width:28px;text-align:center;font-size:18px}
   /* ---------- phone layout (v1.37) ---------- */
   @media(max-width:760px){
+    /* tab bar sits low: only part of the home-bar safe area is kept free (icons stay just above the home indicator) */
+    :root{--navpad:max(4px, calc(env(safe-area-inset-bottom) - 20px))}
     body{padding-top:env(safe-area-inset-top)}
     #app{flex-direction:column}
     nav{position:fixed;left:0;right:0;bottom:0;z-index:50;width:100%;flex-direction:row;justify-content:space-around;align-items:stretch;gap:0;
-        padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-right:none;border-top:1px solid var(--line);background:rgba(11,20,38,.95);backdrop-filter:blur(12px)}
+        padding:5px 4px var(--navpad);border-right:none;border-top:1px solid var(--line);background:rgba(6,12,24,.96);backdrop-filter:blur(12px)}
     nav .logo,nav .spacer,nav .ver,nav .navupd{display:none!important}
     nav button{flex:1;width:auto;flex-direction:column;gap:2px;padding:6px 2px;font-size:10.5px;font-weight:600;border-radius:12px;justify-content:center;align-items:center;text-align:center}
     nav button .ico{font-size:19px;width:auto}
@@ -198,7 +200,7 @@
     .phone-only{display:flex!important}
     body.no-profile nav{display:none!important}
     body.no-profile main{padding-bottom:calc(24px + env(safe-area-inset-bottom))!important}
-    main{padding:14px 12px calc(84px + env(safe-area-inset-bottom))!important}
+    main{padding:14px 12px calc(70px + var(--navpad))!important}
     main.fit,main.fillpage{overflow:auto!important}
     input,select,textarea,.csel{font-size:16px}
     .pagehead h1{font-size:26px}
@@ -225,7 +227,7 @@
     .plan-stats b{font-size:18px}
     .cnotes.even{grid-template-columns:1fr!important}
     .modal{padding:20px;border-radius:18px;max-height:85vh}
-    .toast{bottom:calc(90px + env(safe-area-inset-bottom))!important}
+    .toast{bottom:calc(76px + var(--navpad))!important}
     .celeb-card{padding:24px 18px 18px}
   }
 
@@ -410,9 +412,13 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.38.0";
+const APP_VERSION = "1.38.1";
 
 const CHANGELOG = [
+  { version:"1.38.1", date:"2026-11-11", title:"Darker navy + lower iPhone tab bar", notes:[
+    ["change","The navy background is darker."],
+    ["change","On iPhone the bottom tab bar now sits lower, closer to the bottom edge, while staying clear of the home bar line."],
+  ]},
   { version:"1.38.0", date:"2026-11-11", title:"New colours: navy, grey & green", notes:[
     ["change","New colour scheme: dark navy backgrounds, dark grey cards and panels, and a Spotify-style green accent for buttons, highlights and progress bars."],
     ["change","The Forged muscle tier (Lv 20–34) now uses the same green."],
@@ -2375,7 +2381,7 @@ function bodyView(view, opts, dx){
   }).join("");
   const badges=opts.badges===false?"":Object.entries(BODY_ART_BADGES[view]).filter(([m])=>!BODY_SKIP_BADGES[view].includes(m)).flatMap(([m,pts])=>{
     const L=levelFromXp(S.xp[m]||0), t=tierFor(L.lvl);
-    return pts.map(([x,y])=>`<g class="bm-b"><circle cx="${x}" cy="${y}" r="21" fill="#0b1426" fill-opacity=".85" stroke="${t.color}" stroke-width="3.5"/><text x="${x}" y="${y+9}" text-anchor="middle" font-size="25" font-weight="800" fill="${t.color}">${L.lvl}</text></g>`); }).join("");
+    return pts.map(([x,y])=>`<g class="bm-b"><circle cx="${x}" cy="${y}" r="21" fill="#060c18" fill-opacity=".85" stroke="${t.color}" stroke-width="3.5"/><text x="${x}" y="${y+9}" text-anchor="middle" font-size="25" font-weight="800" fill="${t.color}">${L.lvl}</text></g>`); }).join("");
   return `<g transform="translate(${dx-vx},${-vy+10})">${shapes}${badges}
     <text x="${vx+A.vb[2]/2}" y="${vy+A.vb[3]+48}" text-anchor="middle" font-size="30" fill="var(--muted)" letter-spacing="4">${view.toUpperCase()}</text></g>`;
 }
