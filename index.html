@@ -215,6 +215,8 @@
     .ex .head>div:first-child{flex:1 1 100%}
     .ex .head .row{flex-wrap:wrap}
     .sets{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 46px!important;justify-content:stretch!important;gap:8px}
+    #spmini{flex:1 1 100%;order:3}
+    .sp-day{grid-template-columns:1fr}
     .sets input{padding:10px 6px;height:44px}
     .sets .chk{width:44px;height:44px}
     .setno{width:34px;height:44px}
@@ -284,6 +286,30 @@
   .ex .head .pill{white-space:nowrap}
   .finishbox{max-width:420px;margin:0 auto;text-align:center}
   .wk-head{margin-bottom:12px}
+  .wk-top{gap:12px;flex-wrap:wrap;align-items:center}
+  .wk-top>.wk-title{flex:1 1 auto;min-width:0}
+  #spmini{flex:0 1 400px;min-width:0}
+  #spmini:empty{display:none}
+  .spmini{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:6px 8px 6px 6px;min-width:0}
+  .spmini .sp-art{width:42px;height:42px;border-radius:7px;object-fit:cover;flex-shrink:0}
+  .spmini .sp-ico{width:42px;height:42px;border-radius:7px;display:grid;place-items:center;background:var(--accent-dim);color:var(--accent);font-size:20px;flex-shrink:0}
+  .spmini .sp-meta{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+  .spmini .sp-meta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spmini .sp-meta span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .spmini .sp-meta em{font-style:normal;color:var(--warn,#e0b341);white-space:normal}
+  .spmini .sp-ctl{display:flex;align-items:center;gap:2px;flex-shrink:0}
+  .spmini .sp-ctl button{background:none;border:none;color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;display:grid;place-items:center}
+  .spmini .sp-ctl button:hover{background:var(--card2)}
+  .spmini .sp-ctl .sp-play{background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:800}
+  .spmini .sp-ctl .sp-play:hover{background:var(--accent2)}
+  .spmini .sp-ctl .sp-open{width:auto;border-radius:999px;padding:0 10px;font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent)}
+  .spmini.off .btn{flex-shrink:0}
+  .sp-steps{margin:0 0 12px 18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+  .sp-steps b{color:var(--text)}
+  .sp-steps code{display:inline-block;margin-top:3px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px;color:var(--text);user-select:all;word-break:break-all}
+  .sp-more{margin-top:12px}.sp-more summary{cursor:pointer;margin-bottom:8px}
+  .sp-days{display:flex;flex-direction:column;gap:6px}
+  .sp-day{display:grid;grid-template-columns:minmax(80px,140px) 1fr;gap:8px;align-items:center}
   .wk-shell{padding:16px;background:var(--bg2);border-radius:20px;flex:1;display:flex;flex-direction:column}
   .page.boxed.active{display:flex;flex-direction:column;min-height:100%}
   main.wk{padding-bottom:28px}
@@ -412,9 +438,15 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.38.3";
+const APP_VERSION = "1.39.0";
 
 const CHANGELOG = [
+  { version:"1.39.0", date:"2026-11-11", title:"Spotify companion", notes:[
+    ["new","Spotify in your workouts: a mini player in the workout header shows what's playing, with previous, play/pause and next."],
+    ["new","Pick a workout playlist, plus a different one for each training day. It starts (shuffled) when you start that workout."],
+    ["new","Settings → Spotify walks you through the one-off setup. Works on the PC and the iPhone; playlist choices sync between them."],
+    ["fix","PC: the window's start-up colour and the minimise/maximise/close area now match the navy theme."],
+  ]},
   { version:"1.38.3", date:"2026-11-11", title:"iPhone tab bar at the very bottom", notes:[
     ["change","The iPhone tab bar now sits flush with the bottom of the screen."],
   ]},
@@ -1588,6 +1620,7 @@ function render(){
   if(page==="guide") bindGuide();
   if(page==="settings") bindSettings();
   if(page==="plan") bindPlan();
+  spWatch(page==="workout"&&!!S.active);
   main.scrollTop=0;
 }
 
@@ -1669,6 +1702,235 @@ function renderDashboard(){
   </div>`;
 }
 
+// ---------- Spotify companion (v1.39) ----------
+// FORGE controls the Spotify app on this device (PC app or phone app) through Spotify's Web API.
+// Sign-in: Authorization Code with PKCE (no secret). Client ID + playlist choices live in S.profile.spotify (synced);
+// the sign-in itself is per device (localStorage), because each device signs in separately.
+const SP_AUTH_KEY="forge_spotify_auth", SP_PKCE_KEY="forge_spotify_pkce";
+const SP_SCOPES="user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative";
+const SP_URL={ authorize:"https://accounts.spotify.com/authorize", token:"https://accounts.spotify.com/api/token", api:"https://api.spotify.com/v1" };
+if(window.FORGE_SPOTIFY_TEST_BASE){ const b=window.FORGE_SPOTIFY_TEST_BASE; SP_URL.authorize=b+"/authorize"; SP_URL.token=b+"/api/token"; SP_URL.api=b+"/v1"; }
+const SP_DESKTOP_REDIRECT="http://127.0.0.1:43821/callback";
+const SP_PHONE_REDIRECT="https://stawda.github.io/forge/";
+let SP={state:null, err:"", lists:null, listsBusy:false, timer:null, me:null, busy:false};
+const spCfg=()=>{ const p=S.profile; if(!p) return {}; return p.spotify||(p.spotify={}); };
+const spClientId=()=>(spCfg().clientId||"").trim();
+const spAuth=()=>{ try{ return JSON.parse(localStorage.getItem(SP_AUTH_KEY)||"null"); }catch(e){ return null; } };
+const spSetAuth=a=>{ if(a) localStorage.setItem(SP_AUTH_KEY,JSON.stringify(a)); else localStorage.removeItem(SP_AUTH_KEY); };
+const spIsDesktop=()=>!!(window.forge&&window.forge.desktop);
+const spCanConnect=()=>!spIsDesktop()||!!window.forge.spotifyAuth;   // desktop needs program 1.10+
+const spRedirect=()=>spIsDesktop()?SP_DESKTOP_REDIRECT:((location.protocol==="https:"&&location.hostname!=="stawda.github.io")?location.origin+location.pathname:SP_PHONE_REDIRECT);
+const spConnected=()=>!!(spAuth()&&spClientId());
+
+async function spHttp(url, opt={}){
+  const req={url, method:opt.method||"GET", headers:opt.headers||{}, body:opt.body==null?null:opt.body};
+  let status, text;
+  if(window.forge&&window.forge.spotifyAuth&&window.forge.net&&!window.FORGE_SPOTIFY_TEST_BASE){ const r=await window.forge.net(req); status=r.status; text=r.text; if(!status) throw new Error("offline"); }
+  else { let r; try{ r=await fetch(url,{method:req.method,headers:req.headers,body:req.body||undefined}); }catch(e){ throw new Error("offline"); } status=r.status; text=await r.text(); }
+  let data=null; try{ data=text?JSON.parse(text):null; }catch(e){}
+  return {status, data};
+}
+const spForm=o=>Object.entries(o).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v)).join("&");
+function spB64url(bytes){ let s=""; bytes.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function spRandom(n){ const a=new Uint8Array(n); crypto.getRandomValues(a); return spB64url(a).slice(0,n); }
+async function spChallenge(v){ const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)); return spB64url(new Uint8Array(d)); }
+
+async function spConnect(){
+  const cid=spClientId(); if(!cid){ toast("Add your Spotify Client ID first"); return; }
+  if(!spCanConnect()){ toast("Install the program update first (bottom-left button), then connect Spotify"); return; }
+  const verifier=spRandom(64), state=spRandom(16), redirect=spRedirect();
+  const url=SP_URL.authorize+"?"+spForm({client_id:cid,response_type:"code",redirect_uri:redirect,code_challenge_method:"S256",code_challenge:await spChallenge(verifier),scope:SP_SCOPES,state});
+  if(spIsDesktop()){
+    const back=await window.forge.spotifyAuth(url);
+    if(!back) return;   // window closed
+    const q=new URL(back).searchParams;
+    if(q.get("error")){ toast(q.get("error")==="access_denied"?"Spotify connection cancelled":"Spotify said: "+q.get("error")); return; }
+    if(q.get("state")!==state){ toast("Spotify sign-in didn't match. Try again."); return; }
+    await spFinish(q.get("code"), verifier, redirect);
+  } else {
+    localStorage.setItem(SP_PKCE_KEY,JSON.stringify({verifier,state,redirect,at:Date.now()}));
+    location.href=url;
+  }
+}
+async function spFinish(code, verifier, redirect){
+  try{
+    const r=await spHttp(SP_URL.token,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:spForm({grant_type:"authorization_code",code,redirect_uri:redirect,client_id:spClientId(),code_verifier:verifier})});
+    if(r.status!==200||!r.data||!r.data.access_token){ toast(spTokenErr(r.data)); return false; }
+    spSetAuth({access:r.data.access_token,refresh:r.data.refresh_token,exp:Date.now()+(r.data.expires_in||3600)*1000,since:Date.now()});
+    SP.err=""; SP.lists=null; SP.me=null;
+    toast("Spotify connected 🎵"); spLoadMe(); if(page==="settings") spRedrawCard(); else render(); return true;
+  }catch(e){ toast(e.message==="offline"?"No internet connection":"Couldn't connect Spotify"); return false; }
+}
+function spTokenErr(d){
+  const e=d&&(d.error_description||d.error)||"";
+  if(/redirect/i.test(e)) return "Spotify: the Redirect URI isn't in your Spotify app settings (see the steps in Settings).";
+  if(/client/i.test(e)) return "Spotify doesn't recognise that Client ID. Check it in Settings.";
+  return "Spotify sign-in failed"+(e?": "+e:"");
+}
+// phone/browser: Spotify sends us back to the page with ?code=…&state=…
+function spCheckRedirect(){
+  let q; try{ q=new URLSearchParams(location.search); }catch(e){ return; }
+  if(!q.has("state")||!(q.has("code")||q.has("error"))) return;
+  let pk=null; try{ pk=JSON.parse(localStorage.getItem(SP_PKCE_KEY)||"null"); }catch(e){}
+  try{ history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
+  if(!pk||pk.state!==q.get("state")){ setTimeout(()=>toast("Spotify sign-in couldn't finish. Try Connect again."),300); return; }
+  localStorage.removeItem(SP_PKCE_KEY);
+  if(q.get("error")){ setTimeout(()=>toast("Spotify connection cancelled"),300); return; }
+  if(S.profile) page="settings";
+  spFinish(q.get("code"), pk.verifier, pk.redirect);
+}
+async function spToken(force){
+  const a=spAuth(); if(!a) return null;
+  if(!force && a.exp>Date.now()+60000) return a.access;
+  let r; try{ r=await spHttp(SP_URL.token,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:spForm({grant_type:"refresh_token",refresh_token:a.refresh,client_id:spClientId()})}); }
+  catch(e){ throw new Error("offline"); }
+  if(r.status===200&&r.data&&r.data.access_token){ spSetAuth(Object.assign(a,{access:r.data.access_token,refresh:r.data.refresh_token||a.refresh,exp:Date.now()+(r.data.expires_in||3600)*1000})); return r.data.access_token; }
+  if(r.status===400||r.status===401){ spSetAuth(null); SP.state=null; SP.err="Spotify sign-in expired. Reconnect it in Settings."; throw new Error("expired"); }
+  throw new Error("Spotify "+r.status);
+}
+async function spApi(path, opt={}, retried){
+  const tok=await spToken(); if(!tok) throw new Error("notconnected");
+  const headers={Authorization:"Bearer "+tok}; let body=null;
+  if(opt.body!==undefined){ headers["Content-Type"]="application/json"; body=JSON.stringify(opt.body); }
+  const r=await spHttp(SP_URL.api+path,{method:opt.method||"GET",headers,body});
+  if(r.status===401&&!retried){ await spToken(true); return spApi(path,opt,true); }
+  if(r.status===204||(r.status>=200&&r.status<300)) return r.data;
+  const reason=r.data&&r.data.error&&(r.data.error.reason||r.data.error.message)||"";
+  if(r.status===404&&/NO_ACTIVE_DEVICE|device/i.test(reason)) throw new Error("nodevice");
+  if(r.status===403&&/PREMIUM/i.test(reason)) throw new Error("premium");
+  if(r.status===403) throw new Error("forbidden");
+  if(r.status===429) throw new Error("busy");
+  throw new Error("Spotify "+r.status+(reason?": "+reason:""));
+}
+function spErrText(e){
+  const m=String(e&&e.message||e);
+  if(m==="nodevice") return spIsDesktop()?"Open the Spotify app on this PC, then press play.":"Open the Spotify app on your phone, then press play.";
+  if(m==="premium") return "Spotify says playback control needs Premium.";
+  if(m==="forbidden") return "Spotify refused. Is this account added under User Management in your Spotify app?";
+  if(m==="offline") return "No internet connection.";
+  if(m==="busy") return "Spotify is busy, try again in a moment.";
+  if(m==="expired") return "Spotify sign-in expired. Reconnect it in Settings.";
+  if(m==="notconnected") return "Spotify isn't connected on this device.";
+  return m;
+}
+async function spLoadMe(){ try{ SP.me=await spApi("/me"); if(page==="settings") spRedrawCard(); }catch(e){} }
+async function spLoadLists(){
+  if(SP.listsBusy) return; SP.listsBusy=true;
+  try{ let out=[], url="/me/playlists?limit=50";
+    for(let i=0;i<4&&url;i++){ const d=await spApi(url); (d&&d.items||[]).forEach(p=>{ if(p&&p.uri) out.push({uri:p.uri,name:p.name||"Untitled",n:(p.items||p.tracks||{}).total}); });
+      url=d&&d.next?d.next.replace(SP_URL.api,"").replace("https://api.spotify.com/v1",""):null; }
+    SP.lists=out; }
+  catch(e){ SP.err=spErrText(e); SP.lists=SP.lists||[]; }
+  SP.listsBusy=false; if(page==="settings") spRedrawCard();
+}
+// which playlist goes with plan day i (or the default)
+function spListFor(i){ const c=spCfg(), d=c.days&&c.days[i]; return (d&&d.uri)?d:(c.def&&c.def.uri?c.def:null); }
+
+// ---- playback ----
+async function spPickDevice(){
+  const d=await spApi("/me/player/devices"); const list=(d&&d.devices||[]).filter(x=>!x.is_restricted);
+  if(!list.length) throw new Error("nodevice");
+  const want=spIsDesktop()?"computer":"smartphone";
+  return (list.find(x=>x.is_active)||list.find(x=>String(x.type).toLowerCase()===want)||list[0]).id;
+}
+async function spPlay(uri){
+  const dev=await spPickDevice(); const q="?device_id="+encodeURIComponent(dev);
+  if(uri){ try{ await spApi("/me/player/shuffle"+q+"&state="+(spCfg().shuffle!==false), {method:"PUT"}); }catch(e){}
+    await spApi("/me/player/play"+q,{method:"PUT",body:{context_uri:uri}});
+    if(spCfg().shuffle!==false){ try{ await spApi("/me/player/shuffle"+q+"&state=true",{method:"PUT"}); }catch(e){} } }
+  else await spApi("/me/player/play"+q,{method:"PUT"});
+}
+async function spStartFor(i){   // called when a workout starts
+  const c=spCfg(); if(!spConnected()||c.auto===false) return;
+  const pl=spListFor(i); if(!pl) return;
+  try{ await spPlay(pl.uri); SP.err=""; toast("🎵 Playing "+pl.name); }
+  catch(e){ SP.err=spErrText(e); if(String(e.message)==="nodevice") toast("🎵 Open Spotify to start "+pl.name); }
+  setTimeout(spPoll,700); setTimeout(spPoll,2500);
+}
+async function spCmd(kind){
+  if(SP.busy) return; SP.busy=true;
+  try{
+    const playing=SP.state&&SP.state.is_playing;
+    if(kind==="toggle"){
+      if(playing){ await spApi("/me/player/pause",{method:"PUT"}); SP.state.is_playing=false; }
+      else if(SP.state&&SP.state.item){ try{ await spApi("/me/player/play",{method:"PUT"}); }catch(e){ if(e.message!=="nodevice") throw e; await spPlay(null); } SP.state.is_playing=true; }
+      else { const pl=S.active&&spListFor(S.active.dayIndex); await spPlay(pl?pl.uri:null); }
+    }
+    if(kind==="next") await spApi("/me/player/next",{method:"POST"});
+    if(kind==="prev") await spApi("/me/player/previous",{method:"POST"});
+    SP.err="";
+  }catch(e){ SP.err=spErrText(e); }
+  SP.busy=false; spPaint(); setTimeout(spPoll,450);
+}
+async function spPoll(){
+  if(!spConnected()) { spPaint(); return; }
+  try{ const d=await spApi("/me/player"); SP.state=d&&d.item?d:(d||null); if(SP.err&&d&&d.item) SP.err=""; }
+  catch(e){ if(e.message!=="offline") SP.err=spErrText(e); }
+  spPaint();
+}
+function spWatch(on){
+  clearInterval(SP.timer); SP.timer=null;
+  if(on&&spConnected()){ spPoll(); SP.timer=setInterval(()=>{ if(document.visibilityState==="visible"&&page==="workout") spPoll(); },5000); }
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&page==="workout"&&spConnected()) spPoll(); });
+function spOpenApp(){ if(spIsDesktop()) window.open("spotify:"); else location.href="spotify:"; }
+// mini player (inside the workout header)
+function spMiniHtml(){
+  if(!S.profile||!spClientId()) return "";
+  if(!spAuth()) return `<div class="spmini off"><span class="sp-ico">♫</span><div class="sp-meta"><b>Spotify</b><span>${SP.err?esc(SP.err):"Not connected on this device"}</span></div><button class="btn sm" onclick="go('settings')">Connect</button></div>`;
+  const st=SP.state, it=st&&st.item, art=it&&((it.album&&it.album.images)||(it.images)||[]), img=art&&art.length?(art[art.length>1?art.length-2:0]||art[0]).url:"";
+  const title=it?it.name:"Nothing playing", sub=it?((it.artists||[]).map(a=>a.name).join(", ")||(it.show&&it.show.name)||""):(spListFor(S.active?S.active.dayIndex:-1)?"Press play for "+spListFor(S.active.dayIndex).name:"Press play to start music");
+  const dev=st&&st.device&&st.device.name;
+  return `<div class="spmini">${img?`<img class="sp-art" src="${esc(img)}" alt="">`:`<span class="sp-ico">♫</span>`}
+    <div class="sp-meta"><b title="${esc(title)}">${esc(title)}</b><span>${SP.err?`<em>${esc(SP.err)}</em>`:esc(sub)+(dev&&it?` · ${esc(dev)}`:"")}</span></div>
+    <div class="sp-ctl">${SP.err==spErrText({message:"nodevice"})?`<button class="sp-open" onclick="spOpenApp()" title="Open Spotify">Open Spotify</button>`:""}<button onclick="spCmd('prev')" title="Previous" aria-label="Previous">⏮</button><button class="sp-play" onclick="spCmd('toggle')" title="${st&&st.is_playing?"Pause":"Play"}" aria-label="${st&&st.is_playing?"Pause":"Play"}">${st&&st.is_playing?"❚❚":"▶"}</button><button onclick="spCmd('next')" title="Next" aria-label="Next">⏭</button></div></div>`;
+}
+function spPaint(){ const el=$("#spmini"); if(el) el.innerHTML=spMiniHtml(); }
+
+// ---- Settings card ----
+function spCardHtml(){
+  const c=spCfg(), cid=spClientId(), a=spAuth();
+  const steps=`<ol class="sp-steps">
+    <li>Go to <b>developer.spotify.com/dashboard</b> and log in with your Spotify (Premium) account.</li>
+    <li><b>Create app</b>. Name: FORGE. Description: anything.</li>
+    <li>Under <b>Redirect URIs</b> add both, one at a time:<br><code>${SP_DESKTOP_REDIRECT}</code><br><code>${SP_PHONE_REDIRECT}</code></li>
+    <li>Tick <b>Web API</b>, agree to the terms and <b>Save</b>.</li>
+    <li>Open the app's <b>Settings</b>, copy the <b>Client ID</b> and paste it below.</li></ol>`;
+  if(!cid) return `<p class="small muted" style="margin-bottom:10px">Control Spotify from your workouts: see what's playing, skip songs, and start a playlist for each training day. Needs Spotify Premium and a free Spotify developer app (one-off, about 2 minutes).</p>
+    ${steps}<div class="field"><label class="label">Client ID</label><input id="sp_cid" placeholder="32 letters and numbers" autocomplete="off" spellcheck="false"></div>
+    <button class="btn primary" id="sp_cid_save">Save Client ID</button>`;
+  if(!a) return `<p class="small muted" style="margin-bottom:10px">${SP.err?`<span style="color:var(--danger)">${esc(SP.err)}</span><br>`:""}Client ID saved. Connect Spotify on this ${spIsDesktop()?"PC":"device"} (each device connects once).</p>
+    ${spCanConnect()?`<button class="btn primary" id="sp_connect">♫ Connect Spotify</button>`:`<div class="small" style="color:var(--warn,#e0b341)">Install the program update first (⬆ button bottom-left, Install & restart). Then connect here.</div>`}
+    <details class="sp-more"><summary class="small muted">Change Client ID / setup steps</summary>${steps}<div class="field"><label class="label">Client ID</label><input id="sp_cid" value="${esc(cid)}" autocomplete="off" spellcheck="false"></div><button class="btn sm" id="sp_cid_save">Save</button></details>`;
+  const lists=SP.lists, opt=(cur,blank)=>{ const have=lists||[]; const all=cur&&cur.uri&&!have.some(p=>p.uri===cur.uri)?[cur,...have]:have;
+    return `<option value="">${blank}</option>`+all.map(p=>`<option value="${esc(p.uri)}" ${cur&&cur.uri===p.uri?"selected":""}>${esc(p.name)}${p.n!=null?` (${p.n})`:""}</option>`).join(""); };
+  const days=(S.plan&&S.plan.days)||[];
+  return `<div class="small" style="margin-bottom:12px">✅ Connected${SP.me&&SP.me.display_name?" as <b>"+esc(SP.me.display_name)+"</b>":""} on this ${spIsDesktop()?"PC":"device"}.${SP.err?`<br><span style="color:var(--danger)">${esc(SP.err)}</span>`:""}</div>
+    ${lists===null?`<div class="small muted" style="margin-bottom:10px">Loading your playlists…</div>`:(!lists.length?`<div class="small muted" style="margin-bottom:10px">No playlists found. Save or follow a playlist in Spotify, then press Refresh.</div>`:"")}
+    <div class="field"><label class="label">Workout playlist</label><select id="sp_def">${opt(c.def,"None")}</select></div>
+    ${days.length?`<div class="field"><label class="label">Playlist for each day</label><div class="sp-days">${days.map((d,i)=>`<div class="sp-day"><span class="small">${esc(d.name)}</span><select data-spday="${i}">${opt(c.days&&c.days[i],"Same as workout playlist")}</select></div>`).join("")}</div></div>`:""}
+    <div class="grid2"><div class="field"><label class="label">Start music when I start a workout</label><select id="sp_auto"><option value="1" ${c.auto!==false?"selected":""}>On</option><option value="0" ${c.auto===false?"selected":""}>Off</option></select></div>
+    <div class="field"><label class="label">Shuffle</label><select id="sp_shuffle"><option value="1" ${c.shuffle!==false?"selected":""}>On</option><option value="0" ${c.shuffle===false?"selected":""}>Off</option></select></div></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" id="sp_refresh">↻ Refresh playlists</button><button class="btn sm" id="sp_disconnect">Disconnect this ${spIsDesktop()?"PC":"device"}</button></div>
+    <div class="small muted" style="margin-top:8px">Music plays in the Spotify app on whichever device you're using; FORGE is the remote. Playlist choices sync to your other devices.</div>`;
+}
+function spCard(){ return `<div class="card" id="sp_card"><h3>♫ Spotify</h3><div id="sp_body" class="col">${spCardHtml()}</div></div>`; }
+function spRedrawCard(){ const b=$("#sp_body"); if(!b) return; b.innerHTML=spCardHtml(); bindSpCard(); }
+function bindSpCard(){
+  const sv=$("#sp_cid_save"); if(sv) sv.onclick=()=>{ const v=($("#sp_cid").value||"").trim(); if(!/^[0-9a-f]{32}$/i.test(v)){ toast("That doesn't look like a Client ID (32 letters and numbers)"); return; } const c=spCfg(); if(c.clientId!==v){ c.clientId=v; spSetAuth(null); } save(); toast("Client ID saved"); spRedrawCard(); };
+  const cn=$("#sp_connect"); if(cn) cn.onclick=()=>spConnect();
+  if(spConnected()&&SP.lists===null&&!SP.listsBusy) spLoadLists();
+  if(spConnected()&&!SP.me) spLoadMe();
+  const find=uri=>(SP.lists||[]).find(p=>p.uri===uri)||(spCfg().def&&spCfg().def.uri===uri?spCfg().def:null)||Object.values(spCfg().days||{}).find(d=>d&&d.uri===uri);
+  const pick=v=>{ if(!v) return null; const p=find(v); return {uri:v,name:p?p.name:"Playlist"}; };
+  const d=$("#sp_def"); if(d) d.onchange=e=>{ spCfg().def=pick(e.target.value); save(); toast(spCfg().def?"Workout playlist: "+spCfg().def.name:"No workout playlist"); };
+  $$("[data-spday]").forEach(s=>s.onchange=e=>{ const c=spCfg(); c.days=c.days||{}; const v=pick(e.target.value); if(v) c.days[s.dataset.spday]=v; else delete c.days[s.dataset.spday]; save(); toast(S.plan.days[s.dataset.spday].name+": "+(v?v.name:"workout playlist")); });
+  const au=$("#sp_auto"); if(au) au.onchange=e=>{ spCfg().auto=e.target.value==="1"; save(); toast(spCfg().auto?"Music starts with your workout":"Music won't start automatically"); };
+  const sh=$("#sp_shuffle"); if(sh) sh.onchange=e=>{ spCfg().shuffle=e.target.value==="1"; save(); toast("Shuffle "+(spCfg().shuffle?"on":"off")); };
+  const rf=$("#sp_refresh"); if(rf) rf.onclick=()=>{ SP.lists=null; SP.err=""; spRedrawCard(); };
+  const dc=$("#sp_disconnect"); if(dc) dc.onclick=async()=>{ if(await askConfirm({title:"Disconnect Spotify?",body:"FORGE stops controlling Spotify on this "+(spIsDesktop()?"PC":"device")+". Your playlist choices are kept.",ok:"Disconnect",icon:"♫"})){ spSetAuth(null); SP.state=null; SP.lists=null; SP.me=null; SP.err=""; spRedrawCard(); toast("Spotify disconnected"); } };
+}
+
 // ----- Workout -----
 function startWorkout(idx){
   if(!S.active){
@@ -1677,7 +1939,7 @@ function startWorkout(idx){
       const sug=suggestFor(e.ex,e.reps,e.sets); const w=sug?sug.w:0;
       return {ex:e.ex,reps:e.reps,rest:e.rest,sug,sets:Array.from({length:e.sets},(_,i)=>({w,reps:sug&&sug.targets?sug.targets[i]:e.reps[0],done:false}))};
     })};
-    save();
+    save(); spStartFor(idx);
   }
   go("workout");
 }
@@ -1693,7 +1955,7 @@ function renderWorkout(){
         <ul>${d.exercises.map(e=>`<li><span>${EX[e.ex].name}</span><span class="muted">${e.sets}×${e.reps[0]}–${e.reps[1]}</span></li>`).join("")}</ul>
         <div class="pd-go">Start ${d.name} →</div></button>`; }).join("")}</div></div>`; }
   const done=a.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0), total=a.exercises.reduce((n,e)=>n+e.sets.length,0);
-  return `<div class="card wk-head"><div class="row between"><div><div class="tiny muted">Active workout</div><h1 style="margin:2px 0 0">${esc(a.name)}</h1></div><button class="btn danger sm" onclick="cancelWorkout()">Discard</button></div>
+  return `<div class="card wk-head"><div class="row between wk-top"><div class="wk-title"><div class="tiny muted">Active workout</div><h1 style="margin:2px 0 0">${esc(a.name)}</h1></div><div id="spmini">${spMiniHtml()}</div><button class="btn danger sm" onclick="cancelWorkout()">Discard</button></div>
   <div class="bar wbar" style="margin-top:14px"><i style="width:${total?done/total*100:0}%"></i></div>
   <div class="small muted" style="margin-top:10px">💡 ${effortTip()}${S.profile.autoAdjust!==false?" Tick a set and FORGE adjusts the next one if your reps land outside the range.":""}</div></div>
   <div class="exgrid">${a.exercises.map((e,ei)=>{const x=EX[e.ex]; return `<div class="ex"><div class="head"><div><b>${x.name}</b><div class="small muted">${MUSCLE_NAME[x.p]}${x.s.length?' · '+x.s.map(m=>MUSCLE_NAME[m]).join(", "):''} · ${e.reps[0]}–${e.reps[1]} ${TIMED.has(e.ex)?'s':'reps'} · rest ${effRest(e.rest)}s</div>${e.sug&&e.sug.last?`<div class="small" style="margin-top:3px;color:var(--text)">${lastText(e)}</div>`:''}${e.sug&&e.sug.upgrade?`<button class="btn sm primary" style="margin-top:8px" onclick="upgradeExercise(${ei})">⬆ Ready for ${EX[e.sug.upgrade].name}</button> <span class="small muted">You hit ${TIMED.has(e.ex)?TIMED_UPGRADE+'s':Math.max(e.reps[1],BW_UPGRADE)+'+ reps'} on every set</span>`:''}</div>
@@ -2444,6 +2706,7 @@ function renderSettings(){
       <button class="btn primary" id="s_save">Save & rebuild plan</button><div class="small muted">Your XP, PRs and history are kept. Only the plan is rebuilt.</div></div></div>
     <div class="col">
       ${syncCard()}
+      ${spCard()}
       <div class="card"><h3>Workout</h3><div class="col">
         <div class="field"><label class="label">Rest times</label><select id="s_restOffset">${[-30,-15,0,15,30,60].map(v=>`<option value="${v}" ${v==(Number(p.restOffset)||0)?'selected':''}>${v===0?'Plan default':(v>0?'+':'−')+Math.abs(v)+' s on every rest'}</option>`).join("")}</select></div>
         <div class="grid2"><div class="field"><label class="label">Timer sound</label><select id="s_restSound"><option value="1" ${p.restSound!==false?'selected':''}>On</option><option value="0" ${p.restSound===false?'selected':''}>Off</option></select></div>
@@ -2461,7 +2724,7 @@ let SKIT=[];   // equipment being edited on the Settings screen
 function bindSettings(){
   $("#s_restOffset").onchange=e=>{S.profile.restOffset=Number(e.target.value); save(); toast("Rest times updated");};
   $("#s_restSound").onchange=e=>{S.profile.restSound=e.target.value==="1"; save(); toast("Timer sound "+(S.profile.restSound?"on":"off"));};
-  bindSyncCard();
+  bindSyncCard(); bindSpCard();
   $("#s_autoAdjust").onchange=e=>{S.profile.autoAdjust=e.target.value==="1"; save(); toast(S.profile.autoAdjust?"Next-set adjustments on":"Next-set adjustments off");};
   $("#s_warmups").onchange=e=>{S.profile.warmups=e.target.value==="1"; save(); toast(S.profile.warmups?"Warm-up sets shown":"Warm-up sets hidden");};
   $("#s_restAuto").onchange=e=>{S.profile.restAuto=e.target.value==="1"; save(); toast(S.profile.restAuto?"Timer starts when you tick a set":"Timer won't start automatically");};
@@ -2478,7 +2741,7 @@ function bindSettings(){
   $("#s_export").onclick=async()=>{ let photos=[]; try{ photos=await PhotoDB.all(); }catch(e){} const blob=new Blob([JSON.stringify(Object.assign({},S,{_photos:photos}),null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`forge-backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); toast("Backup downloaded"); };
   $("#s_import").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=async()=>{ try{ const d=JSON.parse(r.result); if(!d.profile) throw 0; if(await askConfirm({title:"Restore this backup?",body:"All current data is replaced with the backup: profile, XP, history and photos.",ok:"Restore",danger:true,icon:"📥"})){ const ph=d._photos||[]; delete d._photos; S=Object.assign(defaultState(),d); save();
           (async()=>{ try{ await PhotoDB.clear(); for(const p of ph) await PhotoDB.put(p); }catch(e){} render(); toast("Backup restored"+(ph.length?` (${ph.length} photos)`:"")); })(); } }catch(err){ toast("That file isn't a FORGE backup"); } }; r.readAsText(f); };
-  $("#s_reset").onclick=async()=>{ if(await askConfirm({title:"Delete all data?",body:"Your profile, XP, history, PRs and photos are deleted from this device. This can't be undone."+(syncAuth()?" This device is also signed out of sync, so your sync account is not touched.":""),ok:"Continue",danger:true}) && await askConfirm({title:"Really sure?",body:"Last chance. Consider exporting a backup first.",ok:"Delete everything",danger:true,icon:"🔥"})){ syncSignOut(); localStorage.removeItem(KEY); PhotoDB.clear().catch(()=>{}); S=defaultState(); onbStep=0; onb={}; render(); } };
+  $("#s_reset").onclick=async()=>{ if(await askConfirm({title:"Delete all data?",body:"Your profile, XP, history, PRs and photos are deleted from this device. This can't be undone."+(syncAuth()?" This device is also signed out of sync, so your sync account is not touched.":""),ok:"Continue",danger:true}) && await askConfirm({title:"Really sure?",body:"Last chance. Consider exporting a backup first.",ok:"Delete everything",danger:true,icon:"🔥"})){ syncSignOut(); spSetAuth(null); localStorage.removeItem(KEY); PhotoDB.clear().catch(()=>{}); S=defaultState(); onbStep=0; onb={}; render(); } };
 }
 
 // ---------- 6. BOOT ----------
@@ -2487,6 +2750,7 @@ function bindSettings(){
 setTimeout(()=>{ try{ if(S_RAW0 && syncAuth()){ const m=syncMeta(); const before=Object.assign(defaultState(),JSON.parse(S_RAW0)); const c={}; Object.keys(before).forEach(k=>{ if(k!=="workouts"&&!SYNC_LOCAL_ONLY.includes(k)) c[k]=before[k]; });
   if(m.hash && m.hash===syncHash(JSON.stringify(c))){ m.hash=coreHash(); setSyncMeta(m); } } }catch(e){ console.warn("sync boot",e); } },0);
 setTimeout(()=>{ if(syncAuth()&&syncCfg()) syncNow(); },800);
+spCheckRedirect();   // v1.39: back from Spotify sign-in (phone)
 // v1.37: installable phone app (only when served over https, never in the desktop app)
 if("serviceWorker" in navigator && location.protocol==="https:"){ addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(e=>console.warn("sw",e))); }
 document.documentElement.classList.toggle("standalone", !!(navigator.standalone || (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)));
