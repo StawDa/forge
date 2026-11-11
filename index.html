@@ -216,6 +216,12 @@
     .ex .head .row{flex-wrap:wrap}
     .sets{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 46px!important;justify-content:stretch!important;gap:8px}
     #spmini{flex:1 1 100%;order:3}
+    .sp-btn{width:38px;height:38px}.sp-btn svg{width:20px;height:20px}.sp-btn.sp-play{width:44px;height:44px}
+    .sp-bar{height:24px}.sp-bar b{opacity:1}
+    .spmini:not(.off){grid-template-columns:auto minmax(0,1fr);grid-template-areas:"art meta" "time time" "ctl ctl";row-gap:6px;padding:10px}
+    .spmini:not(.off) .sp-ctl{justify-content:space-between;padding:0 6px}
+    .spmini .sp-art,.spmini .sp-ico{width:48px;height:48px}
+    .sp-opts{grid-template-columns:1fr}
     .sp-day{grid-template-columns:1fr}
     .sets input{padding:10px 6px;height:44px}
     .sets .chk{width:44px;height:44px}
@@ -288,22 +294,51 @@
   .wk-head{margin-bottom:12px}
   .wk-top{gap:12px;flex-wrap:wrap;align-items:center}
   .wk-top>.wk-title{flex:1 1 auto;min-width:0}
-  #spmini{flex:0 1 400px;min-width:0}
+  #spmini{flex:0 1 470px;min-width:0}
   #spmini:empty{display:none}
-  .spmini{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:6px 8px 6px 6px;min-width:0}
-  .spmini .sp-art{width:42px;height:42px;border-radius:7px;object-fit:cover;flex-shrink:0}
-  .spmini .sp-ico{width:42px;height:42px;border-radius:7px;display:grid;place-items:center;background:var(--accent-dim);color:var(--accent);font-size:20px;flex-shrink:0}
-  .spmini .sp-meta{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+  .spmini{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"art meta ctl" "art time time";column-gap:10px;row-gap:4px;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:7px 10px 7px 7px;min-width:0}
+  .spmini.off{grid-template-areas:"art meta ctl";grid-template-columns:auto minmax(0,1fr) auto}
+  .spmini .sp-art,.spmini .sp-ico{grid-area:art;width:54px;height:54px;border-radius:9px;flex-shrink:0;align-self:center}
+  .spmini .sp-art{object-fit:cover;background:var(--card2)}
+  .spmini .sp-ico{display:grid;place-items:center;background:var(--accent-dim);color:var(--accent)}
+  .spmini .sp-ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9}
+  .spmini .sp-meta{grid-area:meta;min-width:0;display:flex;flex-direction:column;line-height:1.25}
   .spmini .sp-meta b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .spmini .sp-meta span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .spmini .sp-meta em{font-style:normal;color:var(--warn,#e0b341);white-space:normal}
-  .spmini .sp-ctl{display:flex;align-items:center;gap:2px;flex-shrink:0}
-  .spmini .sp-ctl button{background:none;border:none;color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;display:grid;place-items:center}
-  .spmini .sp-ctl button:hover{background:var(--card2)}
-  .spmini .sp-ctl .sp-play{background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:800}
-  .spmini .sp-ctl .sp-play:hover{background:var(--accent2)}
-  .spmini .sp-ctl .sp-open{width:auto;border-radius:999px;padding:0 10px;font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent)}
-  .spmini.off .btn{flex-shrink:0}
+  .spmini .sp-ctl{grid-area:ctl;display:flex;align-items:center;gap:0;flex-shrink:0}
+  .spmini.off>.btn{grid-area:ctl}
+  .sp-btn{background:none;border:none;color:var(--text);width:32px;height:32px;border-radius:50%;cursor:pointer;display:grid;place-items:center;padding:0;transition:background .15s,color .15s,transform .1s}
+  .sp-btn svg{width:18px;height:18px;fill:currentColor}
+  .sp-btn:hover{background:var(--card2)}
+  .sp-btn:active{transform:scale(.92)}
+  .sp-btn.sp-sh{color:var(--muted)}.sp-btn.sp-sh svg{width:17px;height:17px;fill:none}
+  .sp-btn.sp-sh.on{color:var(--accent)}
+  .sp-btn.sp-play{width:36px;height:36px;margin:0 3px;background:var(--accent);color:var(--on-accent)}
+  .sp-btn.sp-play svg{width:17px;height:17px}
+  .sp-btn.sp-play:hover{background:var(--accent2)}
+  .spmini .sp-open{background:none;height:28px;border-radius:999px;padding:0 10px;margin-right:4px;font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent);cursor:pointer}
+  .sp-time{grid-area:time;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .sp-time span{min-width:30px}.sp-time span:last-child{text-align:right}
+  .sp-time.idle{opacity:.45}
+  .sp-bar{position:relative;flex:1;height:18px;cursor:pointer;touch-action:none;outline:none}
+  .sp-track{position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:4px;background:var(--line);overflow:hidden}
+  .sp-track i{display:block;height:100%;background:var(--text);border-radius:4px}
+  .sp-bar:hover .sp-track i,.sp-bar.drag .sp-track i,.sp-bar:focus-visible .sp-track i{background:var(--accent)}
+  .sp-bar b{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5);opacity:0;transition:opacity .15s}
+  .sp-bar:hover b,.sp-bar.drag b,.sp-bar:focus-visible b{opacity:1}
+  .sp-warn{background:var(--accent-dim);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .sp-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sp-opt{display:flex;gap:10px;align-items:center;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);cursor:pointer}
+  .sp-opt:hover{border-color:var(--accent)}
+  .sp-opt b{display:block;font-size:14px}.sp-opt small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .sp-oi{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+  .sp-oi.sp-svg svg{width:22px;height:22px;color:var(--muted);fill:currentColor}
+  .sp-oi.sp-svg.on svg{color:var(--accent)}
+  .sp-oi.sp-svg svg[fill=none],.sp-oi.sp-svg svg path[fill=none]{fill:none}
+  .sp-lists{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto}
+  .sp-li{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);cursor:pointer;text-align:left}
+  .sp-li:hover{border-color:var(--accent)}.sp-li span{color:var(--muted);font-size:12px;flex-shrink:0}
   .sp-steps{margin:0 0 12px 18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
   .sp-steps b{color:var(--text)}
   .sp-steps code{display:inline-block;margin-top:3px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px;color:var(--text);user-select:all;word-break:break-all}
@@ -438,9 +473,16 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.39.0";
+const APP_VERSION = "1.39.1";
 
 const CHANGELOG = [
+  { version:"1.39.1", date:"2026-11-11", title:"Better Spotify player", notes:[
+    ["change","The Spotify player has its own play, pause, skip, back and shuffle buttons instead of emoji, so they look the same on PC and iPhone."],
+    ["new","Song time: see how far through the song you are and drag (or tap) the bar to jump anywhere. Arrow keys jump 10 seconds on PC."],
+    ["new","Music options (… button): Random mix plays 50 random songs from your liked songs and favourites, plus a shuffle switch and quick playlist picker."],
+    ["new","Make a playlist from what you listen to: pick a time range and size, and FORGE builds a private playlist from your most-played and recent songs, and can set it as a day's workout playlist."],
+    ["change","These new options need one extra Spotify permission: FORGE asks you to reconnect once."],
+  ]},
   { version:"1.39.0", date:"2026-11-11", title:"Spotify companion", notes:[
     ["new","Spotify in your workouts: a mini player in the workout header shows what's playing, with previous, play/pause and next."],
     ["new","Pick a workout playlist, plus a different one for each training day. It starts (shuffled) when you start that workout."],
@@ -1707,7 +1749,7 @@ function renderDashboard(){
 // Sign-in: Authorization Code with PKCE (no secret). Client ID + playlist choices live in S.profile.spotify (synced);
 // the sign-in itself is per device (localStorage), because each device signs in separately.
 const SP_AUTH_KEY="forge_spotify_auth", SP_PKCE_KEY="forge_spotify_pkce";
-const SP_SCOPES="user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative";
+const SP_SCOPES="user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-top-read user-read-recently-played user-library-read playlist-modify-private";
 const SP_URL={ authorize:"https://accounts.spotify.com/authorize", token:"https://accounts.spotify.com/api/token", api:"https://api.spotify.com/v1" };
 if(window.FORGE_SPOTIFY_TEST_BASE){ const b=window.FORGE_SPOTIFY_TEST_BASE; SP_URL.authorize=b+"/authorize"; SP_URL.token=b+"/api/token"; SP_URL.api=b+"/v1"; }
 const SP_DESKTOP_REDIRECT="http://127.0.0.1:43821/callback";
@@ -1756,7 +1798,7 @@ async function spFinish(code, verifier, redirect){
   try{
     const r=await spHttp(SP_URL.token,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:spForm({grant_type:"authorization_code",code,redirect_uri:redirect,client_id:spClientId(),code_verifier:verifier})});
     if(r.status!==200||!r.data||!r.data.access_token){ toast(spTokenErr(r.data)); return false; }
-    spSetAuth({access:r.data.access_token,refresh:r.data.refresh_token,exp:Date.now()+(r.data.expires_in||3600)*1000,since:Date.now()});
+    spSetAuth({access:r.data.access_token,refresh:r.data.refresh_token,exp:Date.now()+(r.data.expires_in||3600)*1000,since:Date.now(),scope:r.data.scope||SP_SCOPES});
     SP.err=""; SP.lists=null; SP.me=null;
     toast("Spotify connected 🎵"); spLoadMe(); if(page==="settings") spRedrawCard(); else render(); return true;
   }catch(e){ toast(e.message==="offline"?"No internet connection":"Couldn't connect Spotify"); return false; }
@@ -1798,6 +1840,7 @@ async function spApi(path, opt={}, retried){
   const reason=r.data&&r.data.error&&(r.data.error.reason||r.data.error.message)||"";
   if(r.status===404&&/NO_ACTIVE_DEVICE|device/i.test(reason)) throw new Error("nodevice");
   if(r.status===403&&/PREMIUM/i.test(reason)) throw new Error("premium");
+  if(r.status===403&&/scope/i.test(reason)) throw new Error("scope");
   if(r.status===403) throw new Error("forbidden");
   if(r.status===429) throw new Error("busy");
   throw new Error("Spotify "+r.status+(reason?": "+reason:""));
@@ -1806,6 +1849,7 @@ function spErrText(e){
   const m=String(e&&e.message||e);
   if(m==="nodevice") return spIsDesktop()?"Open the Spotify app on this PC, then press play.":"Open the Spotify app on your phone, then press play.";
   if(m==="premium") return "Spotify says playback control needs Premium.";
+  if(m==="scope") return "Reconnect Spotify (Settings → Spotify) to allow this.";
   if(m==="forbidden") return "Spotify refused. Is this account added under User Management in your Spotify app?";
   if(m==="offline") return "No internet connection.";
   if(m==="busy") return "Spotify is busy, try again in a moment.";
@@ -1847,45 +1891,184 @@ async function spStartFor(i){   // called when a workout starts
   catch(e){ SP.err=spErrText(e); if(String(e.message)==="nodevice") toast("🎵 Open Spotify to start "+pl.name); }
   setTimeout(spPoll,700); setTimeout(spPoll,2500);
 }
+// icons are drawn here (no emoji) so they look the same on every device
+const SP_IC={
+  prev:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="5" width="2.6" height="14" rx="1.1"/><path d="M19.5 6.1v11.8a1.1 1.1 0 0 1-1.7.9L9.4 12.9a1.1 1.1 0 0 1 0-1.8l8.4-5.9a1.1 1.1 0 0 1 1.7.9z"/></svg>',
+  next:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="16.9" y="5" width="2.6" height="14" rx="1.1"/><path d="M4.5 6.1v11.8a1.1 1.1 0 0 0 1.7.9l8.4-5.9a1.1 1.1 0 0 0 0-1.8L6.2 5.2a1.1 1.1 0 0 0-1.7.9z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1.2 1.2 0 0 0 1.8 1l10-6.4a1.2 1.2 0 0 0 0-2l-10-6.4A1.2 1.2 0 0 0 8 5.6z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.3"/><rect x="13.5" y="5" width="4" height="14" rx="1.3"/></svg>',
+  shuffle:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.2.9 4.3 2.6l2.4 4.8c1.1 1.7 2.3 2.6 4.3 2.6H20"/><path d="M3 17h3.5c1.4 0 2.4-.5 3.3-1.4M13.9 8.4c.9-.9 1.9-1.4 3.3-1.4H20"/><path d="M17.5 4.5 20 7l-2.5 2.5M17.5 14.5 20 17l-2.5 2.5"/></svg>',
+  more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18.5" cy="12" r="2"/></svg>',
+  dice:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.3" cy="8.3" r="1.6"/><circle cx="15.7" cy="8.3" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="8.3" cy="15.7" r="1.6"/><circle cx="15.7" cy="15.7" r="1.6"/></svg>',
+  note:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6.6a1 1 0 0 1 .76-.97l8.5-2.1A1 1 0 0 1 19.5 4.5v10.3"/><circle cx="6.6" cy="17.6" r="2.6"/><circle cx="17" cy="15" r="2.6"/></svg>',
+};
+const SP_NEED_EXTRA=["user-top-read","user-read-recently-played","user-library-read","playlist-modify-private"];
+const spHasScopes=list=>{ const a=spAuth(); const s=(a&&a.scope)||""; return list.every(x=>s.split(" ").includes(x)); };
+const spFmt=ms=>{ ms=Math.max(0,ms||0); const s=Math.floor(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+function spPos(){ const st=SP.state; if(!st||!st.item) return 0; const d=st.item.duration_ms||0; let p=(st.progress_ms||0)+(st.is_playing?Date.now()-(SP.at||Date.now()):0); return Math.min(d,Math.max(0,p)); }
+
 async function spCmd(kind){
   if(SP.busy) return; SP.busy=true;
   try{
     const playing=SP.state&&SP.state.is_playing;
     if(kind==="toggle"){
-      if(playing){ await spApi("/me/player/pause",{method:"PUT"}); SP.state.is_playing=false; }
-      else if(SP.state&&SP.state.item){ try{ await spApi("/me/player/play",{method:"PUT"}); }catch(e){ if(e.message!=="nodevice") throw e; await spPlay(null); } SP.state.is_playing=true; }
+      if(playing){ await spApi("/me/player/pause",{method:"PUT"}); SP.state.progress_ms=spPos(); SP.at=Date.now(); SP.state.is_playing=false; }
+      else if(SP.state&&SP.state.item){ try{ await spApi("/me/player/play",{method:"PUT"}); }catch(e){ if(e.message!=="nodevice") throw e; await spPlay(null); } SP.at=Date.now(); SP.state.is_playing=true; }
       else { const pl=S.active&&spListFor(S.active.dayIndex); await spPlay(pl?pl.uri:null); }
     }
     if(kind==="next") await spApi("/me/player/next",{method:"POST"});
     if(kind==="prev") await spApi("/me/player/previous",{method:"POST"});
+    if(kind==="shuffle"){ const on=!(SP.state&&SP.state.shuffle_state); await spApi("/me/player/shuffle?state="+on,{method:"PUT"}); if(SP.state) SP.state.shuffle_state=on; toast("Shuffle "+(on?"on":"off")); }
     SP.err="";
   }catch(e){ SP.err=spErrText(e); }
   SP.busy=false; spPaint(); setTimeout(spPoll,450);
 }
+async function spSeek(ms){
+  try{ await spApi("/me/player/seek?position_ms="+Math.round(ms),{method:"PUT"}); if(SP.state){ SP.state.progress_ms=ms; SP.at=Date.now(); } SP.err=""; }
+  catch(e){ SP.err=spErrText(e); spPaint(); }
+  setTimeout(spPoll,600);
+}
 async function spPoll(){
   if(!spConnected()) { spPaint(); return; }
-  try{ const d=await spApi("/me/player"); SP.state=d&&d.item?d:(d||null); if(SP.err&&d&&d.item) SP.err=""; }
+  if(SP.dragging) return;
+  try{ const d=await spApi("/me/player"); SP.state=d&&d.item?d:(d||null); SP.at=Date.now(); if(SP.err&&d&&d.item) SP.err=""; }
   catch(e){ if(e.message!=="offline") SP.err=spErrText(e); }
-  spPaint();
+  if(!SP.dragging) spPaint();
 }
 function spWatch(on){
-  clearInterval(SP.timer); SP.timer=null;
-  if(on&&spConnected()){ spPoll(); SP.timer=setInterval(()=>{ if(document.visibilityState==="visible"&&page==="workout") spPoll(); },5000); }
+  clearInterval(SP.timer); SP.timer=null; clearInterval(SP.tick); SP.tick=null;
+  if(on&&spConnected()){ spPoll();
+    SP.timer=setInterval(()=>{ if(document.visibilityState==="visible"&&page==="workout") spPoll(); },5000);
+    SP.tick=setInterval(spTick,500); }
+}
+// moves the progress bar between polls; asks Spotify again when a song ends
+function spTick(){
+  const st=SP.state; if(!st||!st.item||SP.dragging) return;
+  const d=st.item.duration_ms||0, p=spPos();
+  const f=$("#sp_fill"), k=$("#sp_knob"), t=$("#sp_cur");
+  if(f){ const pc=d?p/d*100:0; f.style.width=pc+"%"; if(k) k.style.left=pc+"%"; }
+  if(t) t.textContent=spFmt(p);
+  if(st.is_playing&&d&&p>=d&&!SP.endPoll){ SP.endPoll=true; setTimeout(()=>{ SP.endPoll=false; spPoll(); },900); }
 }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&page==="workout"&&spConnected()) spPoll(); });
 function spOpenApp(){ if(spIsDesktop()) window.open("spotify:"); else location.href="spotify:"; }
 // mini player (inside the workout header)
 function spMiniHtml(){
   if(!S.profile||!spClientId()) return "";
-  if(!spAuth()) return `<div class="spmini off"><span class="sp-ico">♫</span><div class="sp-meta"><b>Spotify</b><span>${SP.err?esc(SP.err):"Not connected on this device"}</span></div><button class="btn sm" onclick="go('settings')">Connect</button></div>`;
+  if(!spAuth()) return `<div class="spmini off"><span class="sp-ico">${SP_IC.note}</span><div class="sp-meta"><b>Spotify</b><span>${SP.err?esc(SP.err):"Not connected on this device"}</span></div><button class="btn sm" onclick="go('settings')">Connect</button></div>`;
   const st=SP.state, it=st&&st.item, art=it&&((it.album&&it.album.images)||(it.images)||[]), img=art&&art.length?(art[art.length>1?art.length-2:0]||art[0]).url:"";
   const title=it?it.name:"Nothing playing", sub=it?((it.artists||[]).map(a=>a.name).join(", ")||(it.show&&it.show.name)||""):(spListFor(S.active?S.active.dayIndex:-1)?"Press play for "+spListFor(S.active.dayIndex).name:"Press play to start music");
-  const dev=st&&st.device&&st.device.name;
-  return `<div class="spmini">${img?`<img class="sp-art" src="${esc(img)}" alt="">`:`<span class="sp-ico">♫</span>`}
+  const dev=st&&st.device&&st.device.name, playing=!!(st&&st.is_playing), dur=it&&it.duration_ms||0, pos=spPos(), pc=dur?pos/dur*100:0;
+  const noDev=SP.err==spErrText({message:"nodevice"});
+  return `<div class="spmini">${img?`<img class="sp-art" src="${esc(img)}" alt="">`:`<span class="sp-ico">${SP_IC.note}</span>`}
     <div class="sp-meta"><b title="${esc(title)}">${esc(title)}</b><span>${SP.err?`<em>${esc(SP.err)}</em>`:esc(sub)+(dev&&it?` · ${esc(dev)}`:"")}</span></div>
-    <div class="sp-ctl">${SP.err==spErrText({message:"nodevice"})?`<button class="sp-open" onclick="spOpenApp()" title="Open Spotify">Open Spotify</button>`:""}<button onclick="spCmd('prev')" title="Previous" aria-label="Previous">⏮</button><button class="sp-play" onclick="spCmd('toggle')" title="${st&&st.is_playing?"Pause":"Play"}" aria-label="${st&&st.is_playing?"Pause":"Play"}">${st&&st.is_playing?"❚❚":"▶"}</button><button onclick="spCmd('next')" title="Next" aria-label="Next">⏭</button></div></div>`;
+    <div class="sp-ctl">${noDev?`<button class="sp-open" onclick="spOpenApp()" title="Open Spotify">Open Spotify</button>`:""}
+      <button class="sp-btn sp-sh ${st&&st.shuffle_state?"on":""}" onclick="spCmd('shuffle')" title="Shuffle" aria-label="Shuffle">${SP_IC.shuffle}</button>
+      <button class="sp-btn" onclick="spCmd('prev')" title="Previous" aria-label="Previous">${SP_IC.prev}</button>
+      <button class="sp-btn sp-play" onclick="spCmd('toggle')" title="${playing?"Pause":"Play"}" aria-label="${playing?"Pause":"Play"}">${playing?SP_IC.pause:SP_IC.play}</button>
+      <button class="sp-btn" onclick="spCmd('next')" title="Next" aria-label="Next">${SP_IC.next}</button>
+      <button class="sp-btn" onclick="spMusicModal()" title="Music options" aria-label="Music options">${SP_IC.more}</button></div>
+    <div class="sp-time ${dur?"":"idle"}"><span id="sp_cur">${spFmt(pos)}</span>
+      <div class="sp-bar" id="sp_bar" role="slider" aria-label="Position in song" aria-valuemin="0" aria-valuemax="${Math.round(dur/1000)}" aria-valuenow="${Math.round(pos/1000)}" tabindex="0"><div class="sp-track"><i id="sp_fill" style="width:${pc}%"></i></div><b id="sp_knob" style="left:${pc}%"></b></div>
+      <span id="sp_dur">${spFmt(dur)}</span></div></div>`;
 }
-function spPaint(){ const el=$("#spmini"); if(el) el.innerHTML=spMiniHtml(); }
+function spPaint(){ const el=$("#spmini"); if(!el) return; el.innerHTML=spMiniHtml(); spBindBar(); }
+// drag (or tap) the bar to move through the song; arrow keys jump 10 s
+function spBindBar(){
+  const bar=$("#sp_bar"); if(!bar) return;
+  const dur=()=>SP.state&&SP.state.item&&SP.state.item.duration_ms||0;
+  const at=x=>{ const r=bar.getBoundingClientRect(); return Math.min(1,Math.max(0,(x-r.left)/r.width)); };
+  const show=f=>{ const pc=f*100; $("#sp_fill").style.width=pc+"%"; $("#sp_knob").style.left=pc+"%"; $("#sp_cur").textContent=spFmt(f*dur()); };
+  bar.onpointerdown=e=>{ if(!dur()) return; e.preventDefault(); SP.dragging=true; bar.classList.add("drag"); try{ bar.setPointerCapture(e.pointerId); }catch(x){} show(at(e.clientX)); };
+  bar.onpointermove=e=>{ if(SP.dragging) show(at(e.clientX)); };
+  const end=e=>{ if(!SP.dragging) return; SP.dragging=false; bar.classList.remove("drag"); const ms=at(e.clientX)*dur(); if(SP.state){ SP.state.progress_ms=ms; SP.at=Date.now(); } show(ms/dur()); spSeek(ms); };
+  bar.onpointerup=end; bar.onpointercancel=()=>{ SP.dragging=false; bar.classList.remove("drag"); };
+  bar.onkeydown=e=>{ if(!dur()||!["ArrowLeft","ArrowRight"].includes(e.key)) return; e.preventDefault(); const ms=Math.min(dur(),Math.max(0,spPos()+(e.key==="ArrowRight"?10000:-10000))); SP.state.progress_ms=ms; SP.at=Date.now(); show(ms/dur()); spSeek(ms); };
+}
+
+// ---- music options: random mix, playlists, playlist from your listening ----
+const spShuffle=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const spTrackUri=t=>t&&t.uri&&/^spotify:track:/.test(t.uri)&&!t.is_local?t.uri:null;
+async function spTop(range,pages){ const out=[]; for(let i=0;i<pages;i++){ const d=await spApi(`/me/top/tracks?time_range=${range}&limit=50&offset=${i*50}`); (d&&d.items||[]).forEach(t=>{ const u=spTrackUri(t); if(u) out.push(u); }); if(!d||!d.next) break; } return out; }
+async function spRecent(){ const d=await spApi("/me/player/recently-played?limit=50"); return (d&&d.items||[]).map(x=>spTrackUri(x.track)).filter(Boolean); }
+async function spLiked(n){ const first=await spApi("/me/tracks?limit=50"); const total=first&&first.total||0, out=[]; const add=d=>(d&&d.items||[]).forEach(x=>{ const u=spTrackUri(x.track); if(u) out.push(u); });
+  add(first); for(let k=0;k<n&&total>50;k++){ const off=Math.floor(Math.random()*Math.max(1,total-50)); add(await spApi("/me/tracks?limit=50&offset="+off)); } return out; }
+const spSafe=async p=>{ try{ return await p; }catch(e){ if(["scope","offline","expired","notconnected"].includes(e.message)) throw e; return []; } };
+// songs for a "made from your listening" playlist
+async function spListening(range){
+  let a=[];
+  if(range==="short_term") a=[...await spSafe(spTop("short_term",1)),...await spSafe(spRecent())];
+  else if(range==="medium_term") a=[...await spSafe(spTop("medium_term",2)),...await spSafe(spTop("short_term",1))];
+  else if(range==="long_term") a=[...await spSafe(spTop("long_term",2))];
+  else a=[...await spSafe(spTop("short_term",1)),...await spSafe(spTop("medium_term",1)),...await spSafe(spTop("long_term",1)),...await spSafe(spRecent())];
+  return [...new Set(a)];
+}
+async function spRandomMix(){
+  if(!spHasScopes(SP_NEED_EXTRA)){ spNeedReconnect(); return; }
+  toast("Picking random songs…");
+  try{ const pool=[...new Set([...await spSafe(spLiked(2)),...await spSafe(spTop("medium_term",1)),...await spSafe(spTop("long_term",1)),...await spSafe(spRecent())])];
+    if(pool.length<5){ toast("Not enough listening history or liked songs for a random mix yet"); return; }
+    const uris=spShuffle(pool).slice(0,50), dev=await spPickDevice();
+    await spApi("/me/player/play?device_id="+encodeURIComponent(dev),{method:"PUT",body:{uris}});
+    SP.err=""; closeModal(); toast(`Random mix: ${uris.length} songs from your liked songs and favourites`);
+  }catch(e){ SP.err=spErrText(e); toast(SP.err); }
+  setTimeout(spPoll,700);
+}
+async function spPlayList(uri,name){
+  try{ await spPlay(uri); SP.err=""; closeModal(); toast("🎵 Playing "+name); }catch(e){ SP.err=spErrText(e); toast(SP.err); }
+  setTimeout(spPoll,700);
+}
+async function spMakePlaylist(){
+  if(!spHasScopes(SP_NEED_EXTRA)){ spNeedReconnect(); return; }
+  const range=$("#spm_range").value, size=Number($("#spm_size").value), use=$("#spm_use").value;
+  const name=($("#spm_name").value||"").trim()||spMixName(range), btn=$("#spm_make");
+  btn.disabled=true; btn.textContent="Making it…";
+  try{
+    const songs=spShuffle(await spListening(range)).slice(0,size);
+    if(songs.length<5){ toast("Not enough listening history for that yet. Try a longer time range."); btn.disabled=false; btn.textContent="Make playlist"; return; }
+    const pl=await spApi("/me/playlists",{method:"POST",body:{name,public:false,description:"Made by FORGE from your "+SP_RANGES[range].toLowerCase()+" listening"}});
+    for(let i=0;i<songs.length;i+=100) await spApi(`/playlists/${pl.id}/items`,{method:"POST",body:{uris:songs.slice(i,i+100)}});
+    const item={uri:pl.uri,name}; SP.lists=[Object.assign({n:songs.length},item),...(SP.lists||[])];
+    const c=spCfg(); if(use==="def") c.def=item; else if(use!==""){ c.days=c.days||{}; c.days[use]=item; } save();
+    closeModal(); toast(`✅ "${name}" made with ${songs.length} songs`+(use!==""?" and set as "+(use==="def"?"your workout playlist":S.plan.days[use].name+"'s playlist"):""));
+    if(S.active&&$("#spm_play")&&$("#spm_play").checked) spPlayList(pl.uri,name);
+    if(page==="settings") spRedrawCard();
+  }catch(e){ toast(spErrText(e)); btn.disabled=false; btn.textContent="Make playlist"; }
+}
+const SP_RANGES={short_term:"Last 4 weeks",medium_term:"Last 6 months",long_term:"All time",mix:"Mix of all"};
+function spMixName(range){ const m=new Date().toLocaleDateString("en-GB",{month:"short",year:"numeric"}); return `FORGE Mix · ${SP_RANGES[range]} · ${m}`; }
+function spNeedReconnect(){
+  modal(`<h2 style="margin-bottom:6px">Allow the new music features</h2><p class="muted small" style="margin-bottom:14px">Random mixes and playlists made from your listening need permission to read your top songs, recently played and liked songs, and to create playlists. Reconnect Spotify once to allow it.</p>
+    <div class="row" style="gap:8px;justify-content:flex-end"><button class="btn" onclick="closeModal()">Not now</button><button class="btn primary" onclick="closeModal();spConnect()">Reconnect Spotify</button></div>`);
+}
+function spMusicModal(){
+  if(!spConnected()){ go("settings"); return; }
+  const st=SP.state, days=(S.plan&&S.plan.days)||[], extra=spHasScopes(SP_NEED_EXTRA);
+  const lists=SP.lists; if(lists===null&&!SP.listsBusy) spLoadLists().then(()=>{ const b=$("#spm_lists"); if(b) b.innerHTML=spListButtons(); });
+  modal(`<h2 style="margin-bottom:4px">Music</h2><p class="muted small" style="margin-bottom:14px">Plays in the Spotify app on this ${spIsDesktop()?"PC":"phone"}.</p>
+    ${extra?"":`<div class="sp-warn small">Random mixes and playlists from your listening need one more permission. <button class="btn sm" onclick="closeModal();spConnect()">Reconnect Spotify</button></div>`}
+    <div class="sp-opts">
+      <button class="sp-opt" onclick="spRandomMix()"><span class="sp-oi sp-svg on">${SP_IC.dice}</span><span><b>Random mix</b><small>50 random songs from your liked songs and favourites</small></span></button>
+      <button class="sp-opt" onclick="spCmd('shuffle')"><span class="sp-oi sp-svg ${st&&st.shuffle_state?"on":""}">${SP_IC.shuffle}</span><span><b>Shuffle ${st&&st.shuffle_state?"is on":"is off"}</b><small>Tap to turn it ${st&&st.shuffle_state?"off":"on"}</small></span></button>
+    </div>
+    <h3 style="margin:18px 0 8px">Make a playlist from what you listen to</h3>
+    <div class="small muted" style="margin-bottom:10px">Built from your most-played and recently played songs. Spotify no longer lets apps suggest new songs, so it's your own favourites, freshly shuffled.</div>
+    <div class="grid2" style="gap:8px">
+      <div class="field"><label class="label">Based on</label><select id="spm_range">${Object.entries(SP_RANGES).map(([k,v])=>`<option value="${k}" ${k==="medium_term"?"selected":""}>${v}</option>`).join("")}</select></div>
+      <div class="field"><label class="label">Songs</label><select id="spm_size"><option value="25">25 songs (~1.5 h)</option><option value="50" selected>50 songs (~3 h)</option><option value="100">100 songs</option></select></div></div>
+    <div class="field"><label class="label">Name</label><input id="spm_name" placeholder="${esc(spMixName("medium_term"))}"></div>
+    <div class="field"><label class="label">Use it for</label><select id="spm_use"><option value="">Nothing, just make it</option><option value="def">My workout playlist</option>${days.map((d,i)=>`<option value="${i}">${esc(d.name)} only</option>`).join("")}</select></div>
+    ${S.active?`<label class="small row" style="gap:8px;margin:2px 0 12px;cursor:pointer"><input type="checkbox" id="spm_play" checked style="width:auto"> Play it now</label>`:""}
+    <button class="btn primary block" id="spm_make" onclick="spMakePlaylist()">Make playlist</button>
+    <h3 style="margin:18px 0 8px">Play a playlist</h3><div class="sp-lists" id="spm_lists">${spListButtons()}</div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="closeModal()">Close</button></div>`);
+  const r=$("#spm_range"); if(r) r.onchange=()=>{ $("#spm_name").placeholder=spMixName(r.value); };
+}
+function spListButtons(){
+  const l=SP.lists; if(l===null) return `<div class="small muted">Loading your playlists…</div>`;
+  if(!l.length) return `<div class="small muted">No playlists yet.</div>`;
+  return l.map(p=>`<button class="sp-li" data-uri="${esc(p.uri)}" onclick="spPlayList(this.dataset.uri,this.querySelector('b').textContent)"><b>${esc(p.name)}</b>${p.n!=null?`<span>${p.n} songs</span>`:""}</button>`).join("");
+}
 
 // ---- Settings card ----
 function spCardHtml(){
@@ -1911,7 +2094,7 @@ function spCardHtml(){
     ${days.length?`<div class="field"><label class="label">Playlist for each day</label><div class="sp-days">${days.map((d,i)=>`<div class="sp-day"><span class="small">${esc(d.name)}</span><select data-spday="${i}">${opt(c.days&&c.days[i],"Same as workout playlist")}</select></div>`).join("")}</div></div>`:""}
     <div class="grid2"><div class="field"><label class="label">Start music when I start a workout</label><select id="sp_auto"><option value="1" ${c.auto!==false?"selected":""}>On</option><option value="0" ${c.auto===false?"selected":""}>Off</option></select></div>
     <div class="field"><label class="label">Shuffle</label><select id="sp_shuffle"><option value="1" ${c.shuffle!==false?"selected":""}>On</option><option value="0" ${c.shuffle===false?"selected":""}>Off</option></select></div></div>
-    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" id="sp_refresh">↻ Refresh playlists</button><button class="btn sm" id="sp_disconnect">Disconnect this ${spIsDesktop()?"PC":"device"}</button></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="spMusicModal()">✨ Make a playlist from my listening</button><button class="btn sm" id="sp_refresh">↻ Refresh playlists</button><button class="btn sm" id="sp_disconnect">Disconnect this ${spIsDesktop()?"PC":"device"}</button></div>
     <div class="small muted" style="margin-top:8px">Music plays in the Spotify app on whichever device you're using; FORGE is the remote. Playlist choices sync to your other devices.</div>`;
 }
 function spCard(){ return `<div class="card" id="sp_card"><h3>♫ Spotify</h3><div id="sp_body" class="col">${spCardHtml()}</div></div>`; }
