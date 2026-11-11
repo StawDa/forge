@@ -188,13 +188,13 @@
   /* ---------- phone layout (v1.37) ---------- */
   @media(max-width:760px){
     /* tab bar sits low: only part of the home-bar safe area is kept free (icons stay just above the home indicator) */
-    :root{--navpad:max(2px, calc(env(safe-area-inset-bottom) - 30px))}
+    :root{--navpad:0px}
     body{padding-top:env(safe-area-inset-top)}
     #app{flex-direction:column}
     nav{position:fixed;left:0;right:0;bottom:0;z-index:50;width:100%;flex-direction:row;justify-content:space-around;align-items:stretch;gap:0;
         padding:4px 4px var(--navpad);border-right:none;border-top:1px solid var(--line);background:rgba(6,12,24,.96);backdrop-filter:blur(12px)}
     nav .logo,nav .spacer,nav .ver,nav .navupd{display:none!important}
-    nav button{flex:1;width:auto;flex-direction:column;gap:2px;padding:6px 2px;font-size:10.5px;font-weight:600;border-radius:12px;justify-content:center;align-items:center;text-align:center}
+    nav button{flex:1;width:auto;flex-direction:column;gap:2px;padding:6px 2px 2px;font-size:10.5px;font-weight:600;border-radius:12px;justify-content:center;align-items:center;text-align:center}
     nav button .ico{font-size:19px;width:auto}
     nav button[data-page="guide"],nav button[data-page="achievements"],nav button[data-page="patchnotes"],nav button[data-page="settings"]{display:none}
     .phone-only{display:flex!important}
@@ -412,9 +412,12 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.38.2";
+const APP_VERSION = "1.38.3";
 
 const CHANGELOG = [
+  { version:"1.38.3", date:"2026-11-11", title:"iPhone tab bar at the very bottom", notes:[
+    ["change","The iPhone tab bar now sits flush with the bottom of the screen."],
+  ]},
   { version:"1.38.2", date:"2026-11-11", title:"iPhone tab bar even lower", notes:[
     ["change","The iPhone tab bar sits even lower, right down at the bottom of the screen."],
   ]},
