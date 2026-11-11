@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10">
+<meta name="theme-color" content="#0b1426">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,8 +14,10 @@
 <title>FORGE — Level Up Your Body</title>
 <style>
   :root{
-    --bg:#0b0d10; --bg2:#12151a; --card:#171b21; --card2:#1e232b; --line:#262c35;
-    --text:#e8ecf1; --muted:#8b95a3; --accent:#b8ff3c; --accent2:#7cd92a; --accent-dim:rgba(184,255,60,.12);
+    /* v1.38 theme: dark navy (primary) · dark grey (secondary) · Spotify green (accent) */
+    --bg:#0b1426; --bg2:#0f1b31; --card:#1c1f26; --card2:#252932; --line:#2f3440;
+    --text:#eaeef4; --muted:#939db0; --accent:#1db954; --accent2:#1ed760; --accent-dim:rgba(29,185,84,.15); --on-accent:#04110a;
+    --hover-line:#454b58;
     --danger:#ff5c5c; --warn:#ffb347; --info:#5cc8ff;
     --chest:#ff6b6b; --back:#4ecdc4; --shoulders:#ffd93d; --biceps:#a78bfa; --triceps:#f472b6;
     --quads:#fb923c; --hamstrings:#34d399; --glutes:#f87171; --core:#60a5fa; --calves:#c084fc;
@@ -91,7 +93,7 @@
   .kit-sub{grid-column:1/-1;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 0}
   select.csel-native{display:none!important}
   .csel{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;width:100%;font:inherit;font-size:15px;color:var(--text);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;transition:border-color .15s,background .15s}
-  .csel:hover{border-color:#3a4250}
+  .csel:hover{border-color:var(--hover-line)}
   .csel:focus-visible,.csel.open{border-color:var(--accent);outline:none}
   .csel-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .csel-chev{flex-shrink:0;color:var(--muted);transition:transform .15s}
@@ -132,8 +134,8 @@
   nav .ver{padding:4px 12px 2px;color:var(--muted);font-size:12px}
   nav .navupd{padding:0 4px}
   nav .navupd button{white-space:nowrap;justify-content:center;font-size:13px;padding:9px 10px;border:1px solid var(--line);color:var(--text)}
-  nav .navupd button.ready{background:var(--accent);color:#0b0d10;border-color:var(--accent);font-weight:800}
-  nav .navupd button.ready:hover{background:var(--accent2);color:#0b0d10}
+  nav .navupd button.ready{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:800}
+  nav .navupd button.ready:hover{background:var(--accent2);color:var(--on-accent)}
   main{flex:1;overflow:auto;padding:28px 32px 60px}
   .page{display:none}.page.active{display:block}
   .page.boxed{max-width:1000px;margin:0 auto}
@@ -188,7 +190,7 @@
     body{padding-top:env(safe-area-inset-top)}
     #app{flex-direction:column}
     nav{position:fixed;left:0;right:0;bottom:0;z-index:50;width:100%;flex-direction:row;justify-content:space-around;align-items:stretch;gap:0;
-        padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-right:none;border-top:1px solid var(--line);background:#0e1116f2;backdrop-filter:blur(12px)}
+        padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-right:none;border-top:1px solid var(--line);background:rgba(11,20,38,.95);backdrop-filter:blur(12px)}
     nav .logo,nav .spacer,nav .ver,nav .navupd{display:none!important}
     nav button{flex:1;width:auto;flex-direction:column;gap:2px;padding:6px 2px;font-size:10.5px;font-weight:600;border-radius:12px;justify-content:center;align-items:center;text-align:center}
     nav button .ico{font-size:19px;width:auto}
@@ -233,7 +235,7 @@
   .card h3{margin-bottom:10px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:10px;font-weight:700;background:var(--card2);border:1px solid var(--line);transition:.15s}
   .btn:hover{border-color:var(--muted)}
-  .btn.primary{background:var(--accent);color:#0b0d10;border-color:var(--accent)}
+  .btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
   .btn.primary:hover{background:var(--accent2)}
   .btn.danger{color:var(--danger);border-color:rgba(255,92,92,.4)}
   .btn.danger.solid{background:var(--danger);color:#fff;border-color:var(--danger);font-weight:800}
@@ -302,7 +304,7 @@
   .sets .h{text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
   .sets input{padding:8px 10px;text-align:center}
   .sets .chk{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--muted)}
-  .sets .chk.done{background:var(--accent);color:#0b0d10;border-color:var(--accent)}
+  .sets .chk.done{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
   .ach{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg2)}
   .ach .ic{font-size:26px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--card)}
   .ach.locked{opacity:.4;filter:grayscale(1)}
@@ -310,7 +312,7 @@
   .changelog .entry{padding:16px 0;border-bottom:1px solid var(--line)}
   .changelog .entry:last-child{border-bottom:none}
   .changelog .tag{font-size:11px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px;text-transform:uppercase}
-  .tag.new{background:rgba(184,255,60,.18);color:var(--accent)}
+  .tag.new{background:rgba(29,185,84,.18);color:var(--accent)}
   .tag.fix{background:rgba(92,200,255,.18);color:var(--info)}
   .tag.change{background:rgba(255,179,71,.18);color:var(--warn)}
   .changelog li{margin:6px 0 6px 4px;list-style:none;font-size:14px}
@@ -319,7 +321,7 @@
   .wk-shell > .wk-pick{margin:0!important;flex:1;display:flex;flex-direction:column}
   .pick-grid{flex:1;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));grid-auto-rows:1fr}
   .pickday{text-align:left;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:border-color .15s,transform .15s,background .15s;padding:16px}
-  .pickday:hover{border-color:#3a4250;background:var(--card2)}
+  .pickday:hover{border-color:var(--hover-line);background:var(--card2)}
   .pickday.today:hover{border-color:var(--accent)}
   .pickday .pd-name{font-size:17px}
   .pd-mus{display:flex;flex-wrap:wrap;gap:6px}
@@ -408,9 +410,13 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.37.1";
+const APP_VERSION = "1.38.0";
 
 const CHANGELOG = [
+  { version:"1.38.0", date:"2026-11-11", title:"New colours: navy, grey & green", notes:[
+    ["change","New colour scheme: dark navy backgrounds, dark grey cards and panels, and a Spotify-style green accent for buttons, highlights and progress bars."],
+    ["change","The Forged muscle tier (Lv 20–34) now uses the same green."],
+  ]},
   { version:"1.37.1", date:"2026-11-11", title:"Sync connected to your Firebase", notes:[
     ["new","FORGE is now connected to your own Firebase project (forge-20852), so there's nothing to paste: go to Settings → Sync, enter your email and a password, and choose Create sync account."],
   ]},
@@ -1489,7 +1495,7 @@ function celebNext(){
   const ok=$("#celeb_ok"); ok.onclick=celebNext; setTimeout(()=>ok.focus(),50);
 }
 function celebConfetti(el,color){
-  const cols=[getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#b6ff3b","#f5c542","#4fc3f7","#c084fc","#ff7a59","#ffffff"];
+  const cols=[getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()||"#1db954","#f5c542","#4fc3f7","#c084fc","#ff7a59","#ffffff"];
   const wrap=document.createElement("div"); wrap.className="celeb-confetti";
   for(let i=0;i<70;i++){ const p=document.createElement("i"); const a=Math.random()*Math.PI*2, d=180+Math.random()*320;
     p.style.setProperty("--dx",Math.cos(a)*d+"px"); p.style.setProperty("--dy",(Math.sin(a)*d*0.7-120)+"px"); p.style.setProperty("--r",(Math.random()*720-360)+"deg");
@@ -1866,7 +1872,7 @@ function radar(){
   const spokes=MUSCLES.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(i,R)[0]}" y2="${pt(i,R)[1]}" stroke="var(--line)"/>`).join("");
   const poly=MUSCLES.map((m,i)=>pt(i,R*levelFromXp(S.xp[m.id]||0).lvl/max).join(",")).join(" ");
   const labels=MUSCLES.map((m,i)=>{const [x,y]=pt(i,R+22);return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--${m.id})" font-weight="700">${m.name}</text>`}).join("");
-  return `<svg class="radar" viewBox="0 0 320 320">${rings}${spokes}<polygon points="${poly}" fill="rgba(184,255,60,.25)" stroke="var(--accent)" stroke-width="2"/>${labels}</svg>`;
+  return `<svg class="radar" viewBox="0 0 320 320">${rings}${spokes}<polygon points="${poly}" fill="rgba(29,185,84,.25)" stroke="var(--accent)" stroke-width="2"/>${labels}</svg>`;
 }
 let PROG_VIEW="body";
 function renderProgress(){
@@ -2331,7 +2337,7 @@ function compareModal(){
 // ---------- body map ----------
 // Muscle groups are coloured by level tier on an anatomical front/back figure.
 const TIERS=[ [1,"Untrained","#6b7586"], [2,"Bronze","#b9804e"], [5,"Silver","#b6c2d1"], [10,"Gold","#f0c64a"],
-              [20,"Forged","#b8ff3c"], [35,"Diamond","#5cc8ff"], [50,"Mythic","#c084fc"] ];
+              [20,"Forged","#1ed760"], [35,"Diamond","#5cc8ff"], [50,"Mythic","#c084fc"] ];
 function tierFor(lvl){ let t=TIERS[0]; TIERS.forEach(x=>{ if(lvl>=x[0]) t=x; }); return {min:t[0],name:t[1],color:t[2]}; }
 
 // Anatomy artwork: shapes from react-native-body-highlighter (MIT, © 2022 ELABBASSI Hicham) — see THIRD-PARTY-NOTICES.md.
@@ -2369,7 +2375,7 @@ function bodyView(view, opts, dx){
   }).join("");
   const badges=opts.badges===false?"":Object.entries(BODY_ART_BADGES[view]).filter(([m])=>!BODY_SKIP_BADGES[view].includes(m)).flatMap(([m,pts])=>{
     const L=levelFromXp(S.xp[m]||0), t=tierFor(L.lvl);
-    return pts.map(([x,y])=>`<g class="bm-b"><circle cx="${x}" cy="${y}" r="21" fill="#0b0d10" fill-opacity=".85" stroke="${t.color}" stroke-width="3.5"/><text x="${x}" y="${y+9}" text-anchor="middle" font-size="25" font-weight="800" fill="${t.color}">${L.lvl}</text></g>`); }).join("");
+    return pts.map(([x,y])=>`<g class="bm-b"><circle cx="${x}" cy="${y}" r="21" fill="#0b1426" fill-opacity=".85" stroke="${t.color}" stroke-width="3.5"/><text x="${x}" y="${y+9}" text-anchor="middle" font-size="25" font-weight="800" fill="${t.color}">${L.lvl}</text></g>`); }).join("");
   return `<g transform="translate(${dx-vx},${-vy+10})">${shapes}${badges}
     <text x="${vx+A.vb[2]/2}" y="${vy+A.vb[3]+48}" text-anchor="middle" font-size="30" fill="var(--muted)" letter-spacing="4">${view.toUpperCase()}</text></g>`;
 }
