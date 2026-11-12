@@ -216,6 +216,8 @@
     .ex .head .row{flex-wrap:wrap}
     .sets{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 46px!important;justify-content:stretch!important;gap:8px}
     #spmini{flex:1 1 100%;order:3}
+    .trip-kits{grid-template-columns:1fr}.area-grid{grid-template-columns:repeat(2,1fr)}
+    .mode-banner{flex-wrap:wrap}.mode-banner .mb-btns{width:100%;justify-content:flex-start;padding-left:34px}
     .sp-btn{width:38px;height:38px}.sp-btn svg{width:20px;height:20px}.sp-btn.sp-play{width:44px;height:44px}
     .sp-bar{height:24px}.sp-bar b{opacity:1}
     .sp-time{flex-wrap:wrap;row-gap:2px}.sp-time .sp-vol{flex:1 1 100%;margin:2px 0 0}.sp-time .sp-vbar{flex:1;height:24px}.sp-vbar b{opacity:1}
@@ -294,6 +296,26 @@
   .finishbox{max-width:420px;margin:0 auto;text-align:center}
   .wk-head{margin-bottom:12px}
   .wk-top{gap:12px;flex-wrap:wrap;align-items:center}
+  .mode-banner{display:flex;align-items:center;gap:12px;border-radius:14px;padding:10px 12px;margin-bottom:12px;border:1px solid var(--line);background:var(--card)}
+  .mode-banner.trip{border-color:rgba(29,185,84,.45);background:linear-gradient(90deg,var(--accent-dim),var(--card) 70%)}
+  .mode-banner.sore{border-color:rgba(224,179,65,.45);background:linear-gradient(90deg,rgba(224,179,65,.13),var(--card) 70%)}
+  .mode-banner .mb-ic{font-size:22px;flex-shrink:0}
+  .mode-banner>div:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}
+  .mode-banner b{font-size:14px}.mode-banner span{font-size:12.5px;color:var(--muted)}
+  .mode-banner .mb-btns{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+  .mode-links a{color:var(--accent);text-decoration:none;font-weight:600}
+  .pill.swap{display:inline-block;margin:3px 0 1px;background:rgba(224,179,65,.13);color:var(--warn,#e0b341);border:1px solid rgba(224,179,65,.35);font-size:11px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sw-ic{color:var(--warn,#e0b341);font-weight:800;cursor:help}
+  .trip-kits{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .trip-kit,.area{background:var(--card2);border:1px solid var(--line);border-radius:12px;color:var(--text);cursor:pointer;text-align:left;padding:10px 12px}
+  .trip-kit b{display:block;font-size:13.5px}.trip-kit small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .trip-kit.on,.area.on{border-color:var(--accent);background:var(--accent-dim)}
+  .area-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .area{text-align:center;font-weight:600;font-size:13.5px;padding:12px 6px}
+  .so-prev ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow:auto}
+  .so-prev li{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;font-size:13px;background:var(--card2);border-radius:8px;padding:7px 10px;align-items:center}
+  .so-prev li span:first-child{color:var(--muted);text-decoration:line-through}.so-prev em{color:var(--warn,#e0b341);font-style:normal;font-size:12px}
+  .so-arrow{color:var(--accent)}
   .wk-top>.wk-title{flex:1 1 auto;min-width:0}
   #spmini{flex:0 1 470px;min-width:0}
   #spmini:empty{display:none}
@@ -483,9 +505,15 @@
    ========================================================= */
 
 // ---------- 1. CONSTANTS & DATA ----------
-const APP_VERSION = "1.39.2";
+const APP_VERSION = "1.40.0";
 
 const CHANGELOG = [
+  { version:"1.40.0", date:"2026-11-12", title:"Holiday mode & sore spots", notes:[
+    ["new","Holiday mode (My Plan → ✈️ Holiday): pick your dates and what you'll have (nothing, a hotel gym or a park), and FORGE gives you a temporary plan for the trip. Your normal plan is paused, not changed, and comes back by itself when the trip ends."],
+    ["new","Sore spots (My Plan → 🩹 Sore spot): pick an area like wrist, knee or lower back and FORGE swaps exercises that load it for ones that train the same muscle without it, for as long as you choose."],
+    ["new","Swapped exercises are marked ↺ with what they replaced. Starting a sore spot mid-workout swaps the exercises you haven't started yet."],
+    ["change","The swap list in a workout only offers exercises that suit your sore spots and holiday equipment."],
+  ]},
   { version:"1.39.2", date:"2026-11-11", title:"Spotify volume", notes:[
     ["new","Volume meter in the Spotify player: drag it (or use the arrow keys) to change Spotify's volume, tap the speaker to mute."],
     ["change","On iPhone the meter shows the level, but iOS only lets the side buttons change it."],
@@ -830,6 +858,9 @@ const EXERCISES = [
   {id:"leg_press_calf",name:"Leg Press Calf Raise",p:"calves",s:[],eq:"gym",t:"isolation",machine:true},
   {id:"smith_calf",name:"Smith Machine Calf Raise",p:"calves",s:[],eq:"gym",t:"isolation",machine:true},
   {id:"bw_calf",name:"Single-Leg Calf Raise",p:"calves",s:[],eq:"body",t:"isolation"},
+  // wrist-friendly stand-ins (v1.40): only used as swaps for a sore spot, never picked for a normal plan
+  {id:"fist_pushup",name:"Fist Push-Up (straight wrists)",p:"chest",s:["triceps","shoulders"],eq:"body",t:"compound",sub:true},
+  {id:"fist_pike",name:"Fist Pike Push-Up",p:"shoulders",s:["triceps"],eq:"body",t:"compound",sub:true}
 ];
 // harder bodyweight variations: never picked by the plan generator, only offered as progressions
 EXERCISES.push(
@@ -992,7 +1023,7 @@ function exParams(e,p){
   return { reps: c? goal.reps : [Math.max(goal.reps[0],8), Math.max(goal.reps[1],12)], rest: Math.max(45, goal.rest + bt.rest + age.rest + (c?0:-30)) };
 }
 function topUpDay(name, exs, p){
-  const kit=userKit(p), pool=EXERCISES.filter(e=>!e.adv && kitAllows(kit,e)), has=id=>exs.some(x=>x.ex===id);
+  const kit=userKit(p), pool=EXERCISES.filter(e=>!e.adv && !e.sub && kitAllows(kit,e)), has=id=>exs.some(x=>x.ex===id);
   const idx=Object.fromEntries(EXERCISES.map((e,i)=>[e.id,i])), loaded=["barbell","dumbbells","cable","pulldown","legpress","legmachines"].filter(k=>kit.includes(k)).length;
   const rank=e=>idx[e.id]+((NEEDS[e.id]||[]).length?0:(loaded>=3?6:loaded>=1?3:0));
   const type=(name||"").toLowerCase().split(" ")[0];
@@ -1029,7 +1060,7 @@ function generatePlan(p, seed){
   const goal=GOALS[p.goal], bt=BODYTYPES[p.bodyType].bias, xp=EXPERIENCE[p.experience];
   const days = splitFor(p.days);
   const kit = userKit(p);
-  const pool = EXERCISES.filter(e=>!e.adv && kitAllows(kit,e));
+  const pool = EXERCISES.filter(e=>!e.adv && !e.sub && kitAllows(kit,e));
   // how many times each muscle appears across the week
   const freq={}; days.forEach(d=>d.m.forEach(m=>freq[m]=(freq[m]||0)+1));
   // weekly sets per muscle → sets per appearance
@@ -1299,7 +1330,7 @@ function finishWorkout(active){
   const levelUps = MUSCLES.filter(m=>levelFromXp(S.xp[m.id]||0).lvl>beforeLvl[m.id]).map(m=>m.name+" → Lv "+levelFromXp(S.xp[m.id]).lvl);
   const levelUpsDetail = MUSCLES.filter(m=>levelFromXp(S.xp[m.id]||0).lvl>beforeLvl[m.id]).map(m=>{ const to=levelFromXp(S.xp[m.id]).lvl, from=beforeLvl[m.id]; return {id:m.id,name:m.name,from,to,tier:tierFor(to),tierUp:tierFor(to).name!==tierFor(from).name}; });
   const afterTotal=levelFromXp(totalXp(S)).lvl;
-  const w={id:Date.now(),date:Date.now(),name:active.name,dayIndex:active.dayIndex,volume:Math.round(volume),sets:setsDone,
+  const w={id:Date.now(),date:Date.now(),name:active.name,dayIndex:active.dayIndex,trip:active.trip||undefined,volume:Math.round(volume),sets:setsDone,
            xp:Object.values(gained).reduce((a,b)=>a+b,0),exercises:active.exercises.map(ex=>({ex:ex.ex,sets:ex.sets.filter(s=>s.done)})),duration:Math.round((Date.now()-active.started)/60000)};
   S.workouts.push(w); S.active=null;
   const newAch=ACHIEVEMENTS.filter(a=>!S.achievements.includes(a.id)&&a.test(S)).map(a=>{S.achievements.push(a.id);return a});
@@ -1661,6 +1692,7 @@ $$("#nav button[data-page]").forEach(b=>b.onclick=()=>go(b.dataset.page));
 $("#navver").textContent="v"+APP_VERSION;
 
 function render(){
+  if(S&&S.trip) checkModes();
   if(window.forge&&window.forge.frameless){ document.body.classList.add("frameless");
     const sub=$("#tb-sub"), lv=$("#tb-lvl");
     if(S.profile){ const L=levelFromXp(totalXp(S)); sub.textContent="· "+S.profile.name; lv.textContent="Lv "+L.lvl+" · "+rankFor(L.lvl); lv.style.display=""; }
@@ -1733,18 +1765,18 @@ function bindOnboarding(){
 function captureOnb(){ if(!onb.wUnit) onb.wUnit="kg"; if(!onb.hUnit) onb.hUnit="cm"; ["name","age"].forEach(k=>{const el=$("#o_"+k); if(el) onb[k]=el.type==="number"?Number(el.value):el.value.trim();}); if($("#o_weight")) Object.assign(onb,readBody("o",{w:onb.wUnit,h:onb.hUnit})); }
 
 // ----- Dashboard -----
-function nextDayIndex(){ if(!S.plan) return 0; const n=S.plan.days.length; const done=S.workouts.filter(w=>w.dayIndex!=null); if(!done.length) return 0; return (done[done.length-1].dayIndex+1)%n; }
+function nextDayIndex(){ const P=basePlan(); if(!P) return 0; const n=P.days.length, trip=tripActive(); const done=S.workouts.filter(w=>w.dayIndex!=null&&!!w.trip===trip&&(!trip||w.date>=S.trip.from)); if(!done.length) return 0; return (done[done.length-1].dayIndex+1)%n; }
 function ring(pct,lvl,sub){ const r=52,c=2*Math.PI*r; return `<div class="levelring"><svg width="120" height="120"><circle cx="60" cy="60" r="${r}" stroke="var(--line)" stroke-width="9" fill="none"/><circle cx="60" cy="60" r="${r}" stroke="var(--accent)" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}"/></svg><div class="num"><b>${lvl}</b><span class="tiny muted">${sub}</span></div></div>`; }
 function muscleRows(){ return MUSCLES.map(m=>{const L=levelFromXp(S.xp[m.id]||0), t=tierFor(L.lvl); return `<div class="mus" title="${m.name} · ${t.name} · ${L.into}/${L.need} XP"><span class="dot" style="background:var(--${m.id})"></span><span class="name">${m.name}</span><div class="bar"><i style="width:${Math.round(L.pct*100)}%;background:${t.color}"></i></div><span class="tierpill" style="color:${t.color};background:${t.color}22">${t.name}</span><span class="lvl" style="color:${t.color}">Lv ${L.lvl}</span></div>`}).join(""); }
 function renderDashboard(){
-  const p=S.profile, L=levelFromXp(totalXp(S)), idx=nextDayIndex(), day=S.plan.days[idx];
+  const p=S.profile, L=levelFromXp(totalXp(S)), idx=nextDayIndex(), day=planDays()[idx];
   const streak=weekStreak(S), week=S.workouts.filter(w=>weekKey(w.date)===weekKey(Date.now())).length;
   const last=S.workouts[S.workouts.length-1];
   const hour=new Date().getHours(), greet=hour<12?"Good morning":hour<18?"Good afternoon":"Good evening";
   return `<div class="pagehead"><div><div class="tiny muted">${greet}</div><h1>${esc(p.name)}</h1></div><span class="pill acc">${rankFor(L.lvl)}</span></div>
-  <div class="grid3" style="margin-bottom:12px">
+  ${modeBanners()}<div class="grid3" style="margin-bottom:12px">
     <div class="card row" style="gap:18px">${ring(L.pct,L.lvl,"level")}<div><div class="tiny muted">Overall</div><b style="font-size:18px">${rankFor(L.lvl)}</b><div class="small muted" style="margin-top:4px">${L.into} / ${L.need} XP to Lv ${L.lvl+1}</div><div class="small muted">${totalXp(S).toLocaleString()} XP total</div></div></div>
-    <div class="card"><div class="grid2 stat-grid"><div class="stat"><b>${streak}</b><span>week streak</span></div><div class="stat"><b>${week}/${S.plan.days.length}</b><span>this week</span></div><div class="stat"><b>${S.workouts.length}</b><span>workouts</span></div><div class="stat"><b>${Object.keys(S.prs).length}</b><span>PRs</span></div></div></div>
+    <div class="card"><div class="grid2 stat-grid"><div class="stat"><b>${streak}</b><span>week streak</span></div><div class="stat"><b>${week}/${basePlan().days.length}</b><span>this week</span></div><div class="stat"><b>${S.workouts.length}</b><span>workouts</span></div><div class="stat"><b>${Object.keys(S.prs).length}</b><span>PRs</span></div></div></div>
     <div class="card"><h3>Next up</h3><b style="font-size:17px">${day.name}</b><div class="small muted" style="margin:4px 0 12px">${day.exercises.length} exercises · ~${Math.round(day.exercises.reduce((a,e)=>a+e.sets*(e.rest+45)/60,0))} min</div>
       <button class="btn primary block" onclick="startWorkout(${idx})">${S.active?'Resume workout':'Start workout'} ⚡</button></div>
   </div>
@@ -1757,6 +1789,134 @@ function renderDashboard(){
     </div>
   </div>`;
 }
+
+// ---------- Sore spots & Holiday mode (v1.40) ----------
+// Both leave S.plan alone. Holiday mode swaps in a temporary plan built for the kit you'll have (S.trip, synced);
+// sore spots (S.profile.avoid) swap any exercise that loads that area for one that trains the same muscle without it.
+const AREAS=[["wrist","Wrist"],["elbow","Elbow"],["shoulder","Shoulder"],["neck","Neck"],["lowerback","Lower back"],["hip","Hip"],["knee","Knee"],["ankle","Ankle"]];
+const AREA_NAME=Object.fromEntries(AREAS);
+// exercises that put a lot of load on each area (pressing on the hands, heavy gripping, deep knee bends, spinal loading…)
+const STRESS={
+  wrist:["bench","smith_bench","pushup","decline_pushup","archer_pushup","diamond","dip","bench_dip","pike_pushup","elev_pike","handstand_hold","ohp","smith_ohp","skull","bb_curl","deadlift","row_bb","rdl","pullup","chinup_bi","hanging_raise","ab_wheel","towel_curl","inv_row","door_row","db_curl","incline_curl","cable_curl","machine_curl"],
+  elbow:["skull","oh_ext","cable_oh_ext","machine_tri_ext","diamond","dip","bench_dip","machine_dip","bb_curl","chinup_bi","pullup","towel_curl","archer_pushup","incline_curl"],
+  shoulder:["fist_pike","fist_pushup","ohp","db_ohp","machine_shoulder_press","smith_ohp","pike_pushup","elev_pike","handstand_hold","dip","bench_dip","machine_dip","bench","smith_bench","db_fly","cable_fly","pec_deck","db_pullover","lat_raise","machine_lat_raise","cable_lat_raise","decline_pushup","archer_pushup","pullup","hanging_raise","skull"],
+  neck:["fist_pike","squat","smith_squat","hack_squat","handstand_hold","pike_pushup","elev_pike","calf_stand","smith_calf","ohp"],
+  lowerback:["deadlift","rdl","db_rdl","row_bb","squat","smith_squat","back_ext_machine","back_ext_45","superman","ohp","calf_stand","ab_wheel","hanging_raise","db_side_bend","good_morning"],
+  hip:["squat","smith_squat","hack_squat","leg_press","goblet","db_lunge","split_squat","pistol","step_up","hip_thrust","db_hip_thrust","machine_hip_thrust","hip_adductor","hip_abductor","deadlift","rdl","db_rdl","hanging_raise","knee_raise_station","cable_kick","glute_kick_machine"],
+  knee:["squat","smith_squat","hack_squat","leg_press","leg_ext","goblet","db_lunge","split_squat","pistol","step_up","bw_squat","wall_sit","nordic"],
+  ankle:["calf_stand","calf_seat","db_calf","smith_calf","bw_calf","leg_press_calf","db_lunge","split_squat","pistol","step_up"],
+};
+const TRIP_KITS={ none:{name:"Nothing at all",desc:"Bodyweight only: hotel room, beach, anywhere",kit:[]},
+  hotel:{name:"Hotel gym",desc:"Dumbbells and a bench",kit:["dumbbells","bench"]},
+  park:{name:"Park / outdoor gym",desc:"Pull-up bar and dip bars",kit:["pullupbar","dipbars"]} };
+const DAY=864e5, dayStart=t=>{ const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+const stressOf=(id,areas)=>areas.filter(a=>STRESS[a]&&STRESS[a].includes(id));
+function avoidAreas(){ const a=S.profile&&S.profile.avoid; if(!a||!a.areas||!a.areas.length) return []; if(a.until&&Date.now()>a.until) return []; return a.areas; }
+function tripActive(){ const t=S.trip; return !!(t&&Date.now()>=t.from&&Date.now()<t.to); }
+function activeKit(){ return tripActive()?S.trip.kit:userKit(); }
+function basePlan(){ return tripActive()&&S.trip.plan?S.trip.plan:S.plan; }
+function pickAlt(id,kit,areas,taken){
+  const cur=EX[id]; if(!cur) return null;
+  const c=EXERCISES.filter(x=>x.p===cur.p&&x.id!==id&&!x.adv&&kitAllows(kit,x)&&!stressOf(x.id,areas).length&&!taken.has(x.id));
+  return c.find(x=>x.t===cur.t)||c[0]||null;
+}
+function adjustDay(d,kit,areas){
+  if(!areas.length) return d;
+  const taken=new Set(d.exercises.map(e=>e.ex)), out=[], skipped=[];
+  d.exercises.forEach(e=>{ const bad=stressOf(e.ex,areas); if(!bad.length){ out.push(e); return; }
+    const alt=pickAlt(e.ex,kit,areas,taken);
+    if(alt){ taken.add(alt.id); out.push(Object.assign({},e,{ex:alt.id,was:e.ex,why:bad[0]})); return; }
+    skipped.push({ex:e.ex,why:bad[0],sets:e.sets}); });
+  // no other safe option: give its sets to a safe exercise for the same muscle in this session (max 5 sets)
+  skipped.forEach(k=>{ const i=out.findIndex(x=>EX[x.ex].p===EX[k.ex].p&&x.sets<5); if(i<0) return; out[i]=Object.assign({},out[i],{sets:Math.min(5,out[i].sets+k.sets)}); k.into=out[i].ex; });
+  return Object.assign({},d,{exercises:out,skipped});
+}
+function planDays(){ const p=basePlan(); if(!p) return []; const areas=avoidAreas(), kit=activeKit(); return p.days.map(d=>adjustDay(d,kit,areas)); }
+function checkModes(){   // trip over → back to normal (once)
+  if(S.trip&&Date.now()>=S.trip.to){ delete S.trip; save(); setTimeout(()=>toast("Welcome back! Your normal plan is active again."),400); }
+}
+const fmtDay=t=>new Date(t).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+function modeBanners(){
+  let h="";
+  if(S.trip){ const on=tripActive(), k=S.trip.kitName||"No equipment";
+    h+=`<div class="mode-banner trip"><span class="mb-ic">✈️</span><div><b>${on?"Holiday mode":"Holiday mode starts "+fmtDay(S.trip.from)}</b><span>${on?"Until "+fmtDay(S.trip.to-1):fmtDay(S.trip.from)+" – "+fmtDay(S.trip.to-1)} · ${esc(k)}${S.trip.short?" · shorter sessions":""}. Your normal plan is paused, not changed.</span></div>
+      <div class="mb-btns"><button class="btn sm" onclick="holidayModal()">Change</button><button class="btn sm" onclick="endHoliday()">${on?"End early":"Cancel"}</button></div></div>`; }
+  const areas=avoidAreas();
+  if(areas.length){ const n=planDays().reduce((t,d)=>t+d.exercises.filter(e=>e.was).length,0), sk=planDays().reduce((t,d)=>t+(d.skipped||[]).filter(k=>!k.into).length,0), u=S.profile.avoid.until;
+    h+=`<div class="mode-banner sore"><span class="mb-ic">🩹</span><div><b>Going easy on your ${areas.map(a=>AREA_NAME[a].toLowerCase()).join(", ")}</b><span>${n} exercise${n===1?"":"s"} swapped${sk?`, ${sk} skipped`:""}${u?" · until "+fmtDay(u-1):""}.</span></div>
+      <div class="mb-btns"><button class="btn sm" onclick="soreModal()">Change</button><button class="btn sm" onclick="clearSore()">It's better</button></div></div>`; }
+  return h;
+}
+function swappedPill(e){ return e.was&&EX[e.was]?`<span class="pill swap" title="Swapped to go easy on your ${AREA_NAME[e.why]?AREA_NAME[e.why].toLowerCase():"sore spot"}">↺ instead of ${esc(EX[e.was].name)}</span>`:""; }
+
+// ---- Holiday mode ----
+function holidayModal(){
+  const p=S.profile, t=S.trip||{}, iso=x=>new Date(x-new Date(x).getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const from=t.from||dayStart(Date.now()), to=t.to?t.to-DAY:from+6*DAY, kk=t.kitKey||"none";
+  modal(`<h2 style="margin-bottom:4px">✈️ Holiday mode</h2><p class="muted small" style="margin-bottom:14px">Away from your gym? FORGE builds a temporary plan for what you'll have. Your normal plan, weights and progress stay exactly as they are, and it switches back by itself when the trip ends.</p>
+    <div class="grid2" style="gap:8px"><div class="field"><label class="label">From</label><input type="date" id="tr_from" value="${iso(from)}"></div>
+    <div class="field"><label class="label">To (last day)</label><input type="date" id="tr_to" value="${iso(to)}"></div></div>
+    <div class="field"><label class="label">What will you have?</label><div class="trip-kits">${Object.entries(TRIP_KITS).map(([k,v])=>`<button class="trip-kit ${k===kk?"on":""}" data-tk="${k}"><b>${v.name}</b><small>${v.desc}</small></button>`).join("")}</div></div>
+    <div class="grid2" style="gap:8px"><div class="field"><label class="label">Workouts per week</label><select id="tr_days">${[2,3,4,5,6].map(n=>`<option value="${n}" ${n===(t.days||p.days)?"selected":""}>${n} days</option>`).join("")}</select></div>
+    <div class="field"><label class="label">Session length</label><select id="tr_short"><option value="0" ${t.short?"":"selected"}>Normal</option><option value="1" ${t.short?"selected":""}>Shorter (one set fewer)</option></select></div></div>
+    <div class="small muted" id="tr_preview" style="margin:4px 0 14px"></div>
+    <div class="row" style="gap:8px;justify-content:flex-end">${S.trip?`<button class="btn" onclick="closeModal();endHoliday()">Turn off</button>`:""}<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="tr_save">${S.trip?"Save":"Start holiday mode"}</button></div>`);
+  let key=kk;
+  const read=()=>{ const f=new Date($("#tr_from").value+"T00:00").getTime(), l=new Date($("#tr_to").value+"T00:00").getTime(); return {from:f,to:l+DAY,days:Number($("#tr_days").value),short:$("#tr_short").value==="1",kitKey:key}; };
+  const prev=()=>{ const r=read(), el=$("#tr_preview"); if(!el) return;
+    if(!(r.to>r.from)){ el.innerHTML=`<span style="color:var(--danger)">The last day has to be on or after the first day.</span>`; return; }
+    const pl=tripPlan(r); const n=Math.round((r.to-r.from)/DAY);
+    el.innerHTML=`${n} day${n===1?"":"s"} · ${pl.days.length} workouts a week: ${pl.days.map(d=>`<b>${esc(d.name)}</b> (${d.exercises.length})`).join(", ")}. e.g. ${[...new Set(pl.days.flatMap(d=>d.exercises.map(e=>EX[e.ex].name)))].slice(0,5).map(esc).join(", ")}…`; };
+  $$("[data-tk]").forEach(b=>b.onclick=()=>{ key=b.dataset.tk; $$("[data-tk]").forEach(x=>x.classList.toggle("on",x===b)); prev(); });
+  ["#tr_from","#tr_to"].forEach(s=>$(s).onchange=prev); ["#tr_days","#tr_short"].forEach(s=>$(s).addEventListener("change",prev));
+  prev();
+  $("#tr_save").onclick=()=>{ const r=read(); if(!(r.to>r.from)){ toast("Check the dates"); return; }
+    if(r.to<=Date.now()){ toast("Those dates are already over"); return; }
+    S.trip=Object.assign(r,{kit:TRIP_KITS[r.kitKey].kit,kitName:TRIP_KITS[r.kitKey].name,plan:tripPlan(r),made:Date.now()});
+    save(); closeModal(); render(); toast(tripActive()?"✈️ Holiday mode on. Enjoy the trip!":"✈️ Holiday mode starts "+fmtDay(S.trip.from)); };
+}
+function tripPlan(r){
+  const p=S.profile, va=Number(p.volumeAdj)||0;
+  return generatePlan(Object.assign({},p,{kit:TRIP_KITS[r.kitKey].kit,days:r.days,volumeAdj:r.short?Math.max(-2,va-1):va}),(S.trip&&S.trip.plan&&S.trip.plan.seed)||Date.now());
+}
+async function endHoliday(){
+  if(!S.trip) return;
+  const on=tripActive();
+  if(!await askConfirm({title:on?"End holiday mode?":"Cancel holiday mode?",body:"Your normal plan is active again straight away. Workouts you logged on holiday are kept.",ok:on?"End it":"Cancel it",cancel:"Keep it",icon:"✈️"})) return;
+  delete S.trip; save(); render(); toast("Normal plan is back");
+}
+
+// ---- Sore spots ----
+function soreModal(){
+  const a=(S.profile.avoid&&avoidAreas().length)?S.profile.avoid:{areas:[],until:null};
+  const sel=new Set(a.areas), durs={"0":"Until I say it's better","3":"3 days","7":"1 week","14":"2 weeks"};
+  const cur=a.until?String(Math.max(1,Math.round((a.until-dayStart(Date.now()))/DAY)-1)):"0";
+  modal(`<h2 style="margin-bottom:4px">🩹 Sore spot</h2><p class="muted small" style="margin-bottom:14px">Pick where it hurts. FORGE swaps exercises that load that area for ones that train the same muscle without it. Your normal plan isn't changed.</p>
+    <div class="area-grid">${AREAS.map(([k,n])=>`<button class="area ${sel.has(k)?"on":""}" data-area="${k}">${n}</button>`).join("")}</div>
+    <div class="field" style="margin-top:12px"><label class="label">For how long?</label><select id="so_dur">${Object.entries(durs).map(([k,v])=>`<option value="${k}" ${k===cur||(!durs[cur]&&k==="0")?"selected":""}>${v}</option>`).join("")}</select></div>
+    <div id="so_prev" class="so-prev"></div>
+    <p class="tiny muted" style="margin:10px 0 14px">Pain that's sharp, getting worse, or still there after a couple of weeks is worth getting checked by a GP or physio.</p>
+    <div class="row" style="gap:8px;justify-content:flex-end">${avoidAreas().length?`<button class="btn" onclick="closeModal();clearSore()">It's better</button>`:""}<button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="so_save">Save</button></div>`);
+  const prev=()=>{ const areas=[...sel], el=$("#so_prev"); if(!areas.length){ el.innerHTML=`<div class="small muted">Pick one or more areas.</div>`; return; }
+    const p=basePlan(), kit=activeKit(), rows=[];
+    p.days.forEach(d=>{ const ad=adjustDay(d,kit,areas); ad.exercises.filter(e=>e.was).forEach(e=>rows.push(`<li><span>${esc(EX[e.was].name)}</span><span class="so-arrow">→</span><b>${esc(EX[e.ex].name)}</b></li>`)); (ad.skipped||[]).forEach(s=>rows.push(`<li><span>${esc(EX[s.ex].name)}</span><span class="so-arrow">→</span>${s.into?`<b>extra sets of ${esc(EX[s.into].name)}</b>`:`<em>skipped (no safe option with your equipment)</em>`}</li>`)); });
+    const uniq=[...new Set(rows)];
+    el.innerHTML=uniq.length?`<div class="label" style="margin-bottom:6px">Changes to your plan</div><ul>${uniq.join("")}</ul>`:`<div class="small muted">Nothing in your plan loads that area much. You're good to go.</div>`; };
+  $$("[data-area]").forEach(b=>b.onclick=()=>{ const k=b.dataset.area; sel.has(k)?sel.delete(k):sel.add(k); b.classList.toggle("on",sel.has(k)); prev(); });
+  prev();
+  $("#so_save").onclick=()=>{ if(!sel.size){ clearSore(true); closeModal(); return; }
+    const d=Number($("#so_dur").value); S.profile.avoid={areas:[...sel],until:d?dayStart(Date.now())+(d+1)*DAY:null,since:Date.now()};
+    const changed=soreFixActive(); save(); closeModal(); render();
+    toast("🩹 Going easy on your "+[...sel].map(a=>AREA_NAME[a].toLowerCase()).join(", ")+(changed?` · ${changed} exercise${changed===1?"":"s"} in today's workout swapped`:"")); };
+}
+// a workout already in progress: swap exercises you haven't started that load the sore area
+function soreFixActive(){
+  if(!S.active) return 0; const areas=avoidAreas(); let n=0; const taken=new Set(S.active.exercises.map(e=>e.ex));
+  S.active.exercises.forEach((e,i)=>{ if(e.sets.some(s=>s.done)) return; const bad=stressOf(e.ex,areas); if(!bad.length) return;
+    const alt=pickAlt(e.ex,activeKit(),areas,taken); if(!alt) return; taken.add(alt.id); const was=e.ex; swapCore(i,alt.id); e.was=was; e.why=bad[0]; n++; });
+  return n;
+}
+function clearSore(quiet){ if(S.profile.avoid){ delete S.profile.avoid; save(); render(); } if(!quiet) toast("Glad it's better! Your normal exercises are back."); }
 
 // ---------- Spotify companion (v1.39) ----------
 // FORGE controls the Spotify app on this device (PC app or phone app) through Spotify's Web API.
@@ -2167,10 +2327,10 @@ function bindSpCard(){
 // ----- Workout -----
 function startWorkout(idx){
   if(!S.active){
-    const d=S.plan.days[idx];
-    S.active={name:d.name,dayIndex:idx,started:Date.now(),exercises:d.exercises.map(e=>{
+    const d=planDays()[idx];
+    S.active={name:d.name,dayIndex:idx,started:Date.now(),trip:tripActive()||undefined,exercises:d.exercises.map(e=>{
       const sug=suggestFor(e.ex,e.reps,e.sets); const w=sug?sug.w:0;
-      return {ex:e.ex,reps:e.reps,rest:e.rest,sug,sets:Array.from({length:e.sets},(_,i)=>({w,reps:sug&&sug.targets?sug.targets[i]:e.reps[0],done:false}))};
+      return {ex:e.ex,reps:e.reps,rest:e.rest,sug,was:e.was,why:e.why,sets:Array.from({length:e.sets},(_,i)=>({w,reps:sug&&sug.targets?sug.targets[i]:e.reps[0],done:false}))};
     })};
     save(); spStartFor(idx);
   }
@@ -2179,8 +2339,8 @@ function startWorkout(idx){
 function renderWorkout(){
   const a=S.active;
   if(!a){ const nx=nextDayIndex();
-    return `<div class="pagehead"><h1>Workout</h1></div><div class="card wk-pick"><h3>No active workout</h3><p class="muted" style="margin-bottom:14px">Pick a day from your plan to start logging.</p>
-    <div class="pick-grid">${S.plan.days.map((d,i)=>{ const mins=Math.round(d.exercises.reduce((t,e)=>t+e.sets*(e.rest+45)/60,0)), sets=d.exercises.reduce((t,e)=>t+e.sets,0);
+    return `<div class="pagehead"><h1>Workout</h1></div>${modeBanners()}<div class="card wk-pick"><h3>No active workout</h3><p class="muted" style="margin-bottom:14px">Pick a day from your plan to start logging.${S.trip||avoidAreas().length?"":` <span class="mode-links"><a href="#" onclick="holidayModal();return false">✈️ Going away?</a> · <a href="#" onclick="soreModal();return false">🩹 Something sore?</a></span>`}</p>
+    <div class="pick-grid">${planDays().map((d,i)=>{ const mins=Math.round(d.exercises.reduce((t,e)=>t+e.sets*(e.rest+45)/60,0)), sets=d.exercises.reduce((t,e)=>t+e.sets,0);
       const ms=[...new Set(d.exercises.map(e=>EX[e.ex].p))];
       return `<button class="daycard pickday ${i===nx?'today':''}" onclick="startWorkout(${i})">
         <div class="row between" style="align-items:flex-start"><div><b class="pd-name">${d.name}</b><div class="small muted">${d.exercises.length} exercises · ${sets} sets · ~${mins} min</div></div>${i===nx?'<span class="pill acc">Next up</span>':''}</div>
@@ -2191,7 +2351,7 @@ function renderWorkout(){
   return `<div class="card wk-head"><div class="row between wk-top"><div class="wk-title"><div class="tiny muted">Active workout</div><h1 style="margin:2px 0 0">${esc(a.name)}</h1></div><div id="spmini">${spMiniHtml()}</div><button class="btn danger sm" onclick="cancelWorkout()">Discard</button></div>
   <div class="bar wbar" style="margin-top:14px"><i style="width:${total?done/total*100:0}%"></i></div>
   <div class="small muted" style="margin-top:10px">💡 ${effortTip()}${S.profile.autoAdjust!==false?" Tick a set and FORGE adjusts the next one if your reps land outside the range.":""}</div></div>
-  <div class="exgrid">${a.exercises.map((e,ei)=>{const x=EX[e.ex]; return `<div class="ex"><div class="head"><div><b>${x.name}</b><div class="small muted">${MUSCLE_NAME[x.p]}${x.s.length?' · '+x.s.map(m=>MUSCLE_NAME[m]).join(", "):''} · ${e.reps[0]}–${e.reps[1]} ${TIMED.has(e.ex)?'s':'reps'} · rest ${effRest(e.rest)}s</div>${e.sug&&e.sug.last?`<div class="small" style="margin-top:3px;color:var(--text)">${lastText(e)}</div>`:''}${e.sug&&e.sug.upgrade?`<button class="btn sm primary" style="margin-top:8px" onclick="upgradeExercise(${ei})">⬆ Ready for ${EX[e.sug.upgrade].name}</button> <span class="small muted">You hit ${TIMED.has(e.ex)?TIMED_UPGRADE+'s':Math.max(e.reps[1],BW_UPGRADE)+'+ reps'} on every set</span>`:''}</div>
+  <div class="exgrid">${a.exercises.map((e,ei)=>{const x=EX[e.ex]; return `<div class="ex"><div class="head"><div><b>${x.name}</b>${swappedPill(e)}<div class="small muted">${MUSCLE_NAME[x.p]}${x.s.length?' · '+x.s.map(m=>MUSCLE_NAME[m]).join(", "):''} · ${e.reps[0]}–${e.reps[1]} ${TIMED.has(e.ex)?'s':'reps'} · rest ${effRest(e.rest)}s</div>${e.sug&&e.sug.last?`<div class="small" style="margin-top:3px;color:var(--text)">${lastText(e)}</div>`:''}${e.sug&&e.sug.upgrade?`<button class="btn sm primary" style="margin-top:8px" onclick="upgradeExercise(${ei})">⬆ Ready for ${EX[e.sug.upgrade].name}</button> <span class="small muted">You hit ${TIMED.has(e.ex)?TIMED_UPGRADE+'s':Math.max(e.reps[1],BW_UPGRADE)+'+ reps'} on every set</span>`:''}</div>
       <div class="row" style="gap:6px"><span class="pill ${e.sug&&e.sug.up?'acc':''}" ${e.sug&&e.sug.start?'title="Estimated from your body weight. Change it if it feels off; what you log becomes your starting point."':''}>${sugText(e)}</span>
       ${S.prs[e.ex]?`<span class="pill">PR ${wDisp(S.prs[e.ex].w)}×${S.prs[e.ex].reps}</span>`:''}<button class="btn sm" onclick="guideModal('${e.ex}')" title="How to do it">?</button><button class="btn sm" onclick="swapExercise(${ei})" title="Swap exercise">⇄</button></div></div>
     ${warmupFor(e,ei)}
@@ -2264,7 +2424,7 @@ function addSet(ei){const e=S.active.exercises[ei]; const l=e.sets[e.sets.length
 function removeSet(ei){const e=S.active.exercises[ei]; if(e.sets.length>1){e.sets.pop();save();render();}}
 async function cancelWorkout(){ if(await askConfirm({title:"Discard this workout?",body:"Nothing from this session will be saved: no sets, XP or PRs.",ok:"Discard",cancel:"Keep going",danger:true,icon:"🗑️"})){S.active=null;restEnd=null;clearInterval(timerInt);save();go("dashboard");} }
 function swapExercise(ei){
-  const cur=EX[S.active.exercises[ei].ex]; const alts=EXERCISES.filter(e=>e.p===cur.p&&e.id!==cur.id&&kitAllows(userKit(),e));
+  const cur=EX[S.active.exercises[ei].ex]; const areas=avoidAreas(); const alts=EXERCISES.filter(e=>e.p===cur.p&&e.id!==cur.id&&kitAllows(activeKit(),e)&&!stressOf(e.id,areas).length);
   modal(`<h2>Swap ${cur.name}</h2><p class="muted small" style="margin:6px 0 14px">Same muscle, different movement.</p><div class="col">${alts.map(e=>`<button class="btn" style="justify-content:space-between" onclick="doSwap(${ei},'${e.id}')"><span>${e.name}</span><span class="muted small">${e.t}</span></button>`).join("")||'<span class="muted">No alternatives with your equipment. Add more kit in Settings.</span>'}</div>`);
 }
 function swapCore(ei,id){ const e=S.active.exercises[ei]; e.ex=id; e.sug=suggestFor(id,e.reps,e.sets.length); const w=e.sug?e.sug.w:0; e.sets.forEach((s,i)=>{if(!s.done){s.w=w; s.reps=e.sug&&e.sug.targets?e.sug.targets[i]:e.reps[0];}}); }
@@ -2286,7 +2446,7 @@ function applyUpgrade(list,from,to){
 // bodyweight progression: swap in the harder version now AND in the plan from here on
 function upgradeExercise(ei){
   const e=S.active.exercises[ei], from=e.ex, to=e.sug&&e.sug.upgrade; if(!to) return;
-  S.plan.days.forEach(d=>applyUpgrade(d.exercises,from,to));
+  basePlan().days.forEach(d=>applyUpgrade(d.exercises,from,to));
   const j=S.active.exercises.findIndex(x=>x.ex===to);
   if(j>=0){ const r=bumpReplacement(S.active.exercises,to,from); if(r) swapCore(j,r); }
   swapCore(ei,to); save(); render();
@@ -2356,10 +2516,10 @@ function checkinAction(wid,action){
 // ----- Plan -----
 function renderPlan(){
   const p=S.profile, g=GOALS[p.goal];
-  return `<div class="pagehead"><div><div class="tiny muted">${g.name} · ${EXPERIENCE[p.experience].name} · ${BODYTYPES[p.bodyType].name} · ${p.days} days/week · ${kitSummary(userKit(p))}</div><h1>My Plan</h1></div>
-    <div class="row"><button class="btn" id="regen">↻ Regenerate</button><button class="btn" onclick="go('settings')">Edit profile</button></div></div>
-  <div class="grid-auto" style="margin-bottom:14px">${S.plan.days.map((d,i)=>`<div class="daycard ${i===nextDayIndex()?'today':''}"><div class="row between"><b>${d.name}</b>${i===nextDayIndex()?'<span class="pill acc">Next</span>':''}</div>
-    <ul>${d.exercises.map(e=>`<li><span>${EX[e.ex].name}</span><span class="muted">${e.sets}×${e.reps[0]}–${e.reps[1]}</span></li>`).join("")}</ul>
+  return `<div class="pagehead"><div><div class="tiny muted">${g.name} · ${EXPERIENCE[p.experience].name} · ${BODYTYPES[p.bodyType].name} · ${tripActive()?`Holiday: ${basePlan().days.length} days/week · ${esc(S.trip.kitName||'no equipment')}`:`${p.days} days/week · ${kitSummary(userKit(p))}`}</div><h1>My Plan</h1></div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn" onclick="holidayModal()">✈️ Holiday</button><button class="btn" onclick="soreModal()">🩹 Sore spot</button><button class="btn" id="regen">↻ Regenerate</button><button class="btn" onclick="go('settings')">Edit profile</button></div></div>
+  ${modeBanners()}<div class="grid-auto" style="margin-bottom:14px">${planDays().map((d,i)=>`<div class="daycard ${i===nextDayIndex()?'today':''}"><div class="row between"><b>${d.name}</b>${i===nextDayIndex()?'<span class="pill acc">Next</span>':''}</div>
+    <ul>${d.exercises.map(e=>`<li><span>${EX[e.ex].name}${e.was?` <span class="sw-ic" title="Instead of ${esc(EX[e.was].name)} (${AREA_NAME[e.why]||""})">↺</span>`:""}</span><span class="muted">${e.sets}×${e.reps[0]}–${e.reps[1]}</span></li>`).join("")}</ul>
     <button class="btn sm block" style="margin-top:10px" onclick="startWorkout(${i})">Start</button></div>`).join("")}</div>
   <div class="card plan-built"><h3>How this plan was built</h3>
     <div class="plan-stats">
@@ -2675,6 +2835,12 @@ const GUIDE = {
   bw_calf:[ "Stand on one foot on a step, holding something for balance. Lower your heel below the step, then rise up high.",
     ["Full stretch at the bottom","Pause at the top","Slow and controlled"],
     ["Bouncing"] ],
+  fist_pushup:[ "Make loose fists and put your knuckles on a folded towel or mat, shoulder-width apart, so your wrists stay straight instead of bent back. Lower your chest to just above the floor and press back up. Drop to your knees to make it easier.",
+    ["Knuckles of the first two fingers take the weight","Wrists stay in a straight line with your forearms","Body in one straight line, squeeze your glutes"],
+    ["Rolling onto the small knuckles, which twists the wrist","Doing it on a hard floor without padding","Pushing through pain: stop if the wrist complains"]],
+  fist_pike:[ "Start in a downward-dog shape with your hips high, resting on your fists (on a towel) so your wrists stay straight. Bend your elbows to lower the top of your head towards the floor between your hands, then press back up.",
+    ["Hips stay high so your shoulders do the work","Elbows track back at about 45°, not flared","Look between your hands"],
+    ["Letting the hips drop into a push-up","Bending the wrists back on flat palms","Going deeper than your shoulders allow"]],
   archer_pushup:[ "Set your hands wide. Lower towards one hand while the other arm stays nearly straight out to the side, then push back up and alternate sides.",
     ["Most of your weight goes on the bending arm","Keep your body straight","Go to the depth you can control"],
     ["Twisting your hips"] ],
